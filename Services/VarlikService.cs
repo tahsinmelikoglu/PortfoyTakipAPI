@@ -53,5 +53,29 @@ namespace PortfoyTakipAPI.Services
             _repository.Add(yeniVarlik);
             _repository.Save(); // Kaydet emrini kiler sorumlusuna iletiyoruz
         }
+        public void Update(VarlikUpdateDTO varlikDto)
+        {
+            // 1. Kilerdeki (Veritabanındaki) mevcut varlığı bul
+            var mevcutVarlik = _repository.GetById(varlikDto.Id);
+
+            // Eğer varlık gerçekten varsa güncelleme yap
+            if (mevcutVarlik != null)
+            {
+                // 2. Tepsideki yeni bilgileri mevcut kaydın üzerine yaz
+                mevcutVarlik.Sembol = varlikDto.Sembol;
+                mevcutVarlik.VarlikTuru = varlikDto.VarlikTuru;
+                mevcutVarlik.Miktar = varlikDto.Miktar;
+
+                // 3. Kiler sorumlusuna (Repository) güncellemeyi bildir ve kaydet
+                _repository.Update(mevcutVarlik);
+                _repository.Save();
+            }
+        }
+        public void Delete(int id)
+        {
+            // Kiler sorumlusuna (Repository) doğrudan silme emrini veriyoruz
+            _repository.Delete(id);
+            _repository.Save();
+        }
     }
 }

@@ -33,5 +33,30 @@ namespace PortfoyTakipAPI.Controllers
             _varlikService.Add(varlikDto);
             return Ok("Yeni varlık portföye başarıyla eklendi.");
         }
+        // PUT: api/varliklar/5
+        [HttpPut("{id}")]
+        public IActionResult Update(int id, VarlikUpdateDTO varlikDto)
+        {
+            // Güvenlik ve Tutarlılık Kontrolü: 
+            // Adres çubuğundan gönderilen ID ile DTO tepsisindeki ID aynı mı?
+            if (id != varlikDto.Id)
+            {
+                return BadRequest("URL'deki ID ile güncellenmek istenen verinin ID'si uyuşmuyor!");
+            }
+
+            // Garson, DTO tepsisini doğrudan aşçıya (Service) veriyor
+            _varlikService.Update(varlikDto);
+
+            return Ok("Varlık başarıyla güncellendi.");
+        }
+        // DELETE: api/varliklar/6
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            // Garson, silinecek ID'yi alıp aşçıya iletiyor
+            _varlikService.Delete(id);
+            return Ok("Varlık portföyden başarıyla silindi.");
+        }
+
     }
 }
