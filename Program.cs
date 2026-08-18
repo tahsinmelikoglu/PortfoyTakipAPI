@@ -1,15 +1,20 @@
-using Microsoft.EntityFrameworkCore;
-using PortfoyTakipAPI.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using PortfoyTakipAPI.Models;
+using PortfoyTakipAPI.Repositories;
+using PortfoyTakipAPI.Services;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));// Sistemde biri IVarlikRepository isterse, ona VarlikRepository sınıfını ver
 
-builder.Services.AddOpenApi();
+builder.Services.AddScoped<IVarlikRepository, VarlikRepository>();
+builder.Services.AddScoped<IVarlikService, VarlikService>();
+builder.Services.AddEndpointsApiExplorer();
+object value = builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -31,7 +36,8 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
