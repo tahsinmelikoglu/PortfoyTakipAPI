@@ -33,7 +33,7 @@ namespace PortfoyTakipAPI.Controllers
             _varlikService.Add(varlikDto);
             return Ok("Yeni varlık portföye başarıyla eklendi.");
         }
-        // PUT: api/varliklar/5
+        // PUT: api/varliklar
         [HttpPut("{id}")]
         public IActionResult Update(int id, VarlikUpdateDTO varlikDto)
         {
@@ -49,7 +49,7 @@ namespace PortfoyTakipAPI.Controllers
 
             return Ok("Varlık başarıyla güncellendi.");
         }
-        // DELETE: api/varliklar/6
+        // DELETE: api/varliklar
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {

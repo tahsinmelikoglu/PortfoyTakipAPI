@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PortfoyTakipAPI.Models;
 using System.Text;
 using System.Text.Json;
-using PortfoyTakipAPI.Models;
 
 namespace PortfoyTakipAPI.Controllers
 {
