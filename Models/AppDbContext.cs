@@ -8,5 +8,6 @@ namespace PortfoyTakipAPI.Models
 
         public DbSet<Varlik> Varliklar { get; set; }
         public DbSet<HalkaArz> HalkaArzlar { get; set; }
+        public DbSet<KullaniciGiris> Kullanicilar { get; set; }
     }
 }

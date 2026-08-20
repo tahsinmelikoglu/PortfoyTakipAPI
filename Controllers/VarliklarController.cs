@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PortfoyTakipAPI.DTOs;
 using PortfoyTakipAPI.Services;
 
 namespace PortfoyTakipAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class VarliklarController : ControllerBase
