@@ -52,6 +52,7 @@ namespace PortfoyTakipAPI.Controllers
             return Ok("Varlık başarıyla güncellendi.");
         }
         // DELETE: api/varliklar
+        [Authorize(Roles ="Admin")]
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
