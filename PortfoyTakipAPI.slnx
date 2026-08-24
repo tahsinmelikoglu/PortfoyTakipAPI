@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/Infrastructure/">
+    <File Path="Infrastructure/nginx.conf" />
+    <File Path="Infrastructure/run-nginx.bat" />
+  </Folder>
   <Project Path="../PortfoyTakip.Web/PortfoyTakip.Web.csproj" Id="b6507a0e-4ffa-4b96-bd58-fff87db878fa" />
   <Project Path="PortfoyTakipAPI.csproj" />
 </Solution>

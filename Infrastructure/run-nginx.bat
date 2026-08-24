@@ -1,0 +1,1 @@
+docker run --name portfoy-proxy -p 9000:80 -v %cd%\nginx.conf:/etc/nginx/nginx.conf:ro -d nginx
