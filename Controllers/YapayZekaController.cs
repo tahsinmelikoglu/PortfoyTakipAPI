@@ -1,71 +1,42 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using PortfoyTakipAPI.Models;
-using System.Text;
-using System.Text.Json;
+using PortfoyTakipAPI.Services;
+using System.Threading.Tasks;
 
 namespace PortfoyTakipAPI.Controllers
 {
-    [Authorize] // Kilitli kapı kuralını burası için de unutmuyoruz!
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize] // Güvenlik kalkanımız burada da aktif (Token zorunlu)
     public class YapayZekaController : ControllerBase
     {
-        private readonly AppDbContext _context;
-        private readonly HttpClient _httpClient;
+        private readonly IYapayZekaService _yapayZekaService;
 
-        public YapayZekaController(AppDbContext context)
+        public YapayZekaController(IYapayZekaService yapayZekaService)
         {
-            _context = context;
-            _httpClient = new HttpClient(); // Ollama ile konuşacak olan telsizimiz
+            _yapayZekaService = yapayZekaService;
         }
 
-        [HttpGet("analiz")]
-        public async Task<IActionResult> PortfoyAnaliziAl()
+        [HttpPost("analiz")]
+        public async Task<IActionResult> PortfoyYorumla([FromBody] PromptRequest request)
         {
-            // 1. Kilerdeki (MSSQL) tüm varlıkları çek
-            var varliklar = await _context.Varliklar.ToListAsync();
-
-            if (varliklar.Count == 0)
-                return BadRequest("Analiz edilecek herhangi bir veri yok.");
-
-            // 2. Yapay zekaya verilecek emri (Prompt) hazırla
-            var promptBuilder = new StringBuilder();
-            promptBuilder.AppendLine("Sen profesyonel bir finans ve portföy danışmanısın. Aşağıdaki portföy verilerine ve tasarruf/bakiye durumuna bakarak bana kısa, net ve stratejik bir Türkçe analiz yap:");
-
-            // Kilerdeki her bir altını/hisse senedini tek tek listeye ekle
-            foreach (var v in varliklar)
+            if (string.IsNullOrWhiteSpace(request.Soru))
             {
-                promptBuilder.AppendLine($"- Tür: {v.VarlikTuru}, Sembol: {v.Sembol}, Miktar: {v.Miktar}, Bakiye Durumu: {v.Bakiye}");
+                return BadRequest(new { message = "Lütfen yapay zekaya sormak istediğiniz soruyu belirtin." });
             }
 
-            // 3. Ollama'ya gönderilecek veri paketini (JSON) hazırla
-            var ollamaIstek = new
+            string aiYaniti = await _yapayZekaService.PortfoyAnaliziYapAsync(request.Soru);
+
+            return Ok(new
             {
-                model = "llama3", // İndirdiğimiz beyin
-                prompt = promptBuilder.ToString(),
-                stream = false // Kelime kelime değil, cevabı toptan ver
-            };
-
-            var content = new StringContent(JsonSerializer.Serialize(ollamaIstek), Encoding.UTF8, "application/json");
-
-            try
-            {
-                // 4. Ollama motoruna (11434 portu) isteği ateşle
-                var response = await _httpClient.PostAsync("http://localhost:11434/api/generate", content);
-                var responseString = await response.Content.ReadAsStringAsync();
-
-                // 5. Gelen cevabı ayrıştır ve müşteriye ilet
-                using var jsonDoc = JsonDocument.Parse(responseString);
-                var aiCevabi = jsonDoc.RootElement.GetProperty("response").GetString();
-
-                return Ok(new { portfoyAnalizi = aiCevabi });
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Yapay zeka motoruna ulaşılamadı. Arka planda Ollama'nın çalıştığından emin olun.");
-            }
+                soru = request.Soru,
+                yapayZekaYorumu = aiYaniti
+            });
         }
+    }
+
+    public class PromptRequest
+    {
+        public string Soru { get; set; }
     }
 }

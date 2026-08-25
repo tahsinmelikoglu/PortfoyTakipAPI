@@ -8,6 +8,8 @@ using PortfoyTakipAPI.Repositories;
 using PortfoyTakipAPI.Services;
 using Serilog;
 using System.Text;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,10 +17,20 @@ builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration));
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));// Sistemde biri IVarlikRepository isterse, ona VarlikRepository sınıfını ver
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// --- YENİ EKLENEN REDIS CACHE AYARI ---
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = "localhost:6379"; // Docker'daki Redis'in adresi
+    options.InstanceName = "PortfoyAPI_"; // Önbellekteki verilerin başına eklenecek etiket
+});
+// --------------------------------------
 
 builder.Services.AddScoped<IVarlikRepository, VarlikRepository>();
 builder.Services.AddScoped<IVarlikService, VarlikService>();
+builder.Services.AddHttpClient<IYapayZekaService, YapayZekaService>();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -44,7 +56,27 @@ builder.Services.AddSwaggerGen(c =>
         [new OpenApiSecuritySchemeReference("Bearer", document)] = []
     });
 });
+
 builder.Services.AddControllers();
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("SabitSinir", opt =>
+    {
+        opt.Window = TimeSpan.FromSeconds(10);
+        opt.PermitLimit = 5;
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = 0;
+    });
+
+    options.OnRejected = async (context, token) =>
+    {
+        context.HttpContext.Response.StatusCode = 429;
+        context.HttpContext.Response.ContentType = "text/plain; charset=utf-8";
+        await context.HttpContext.Response.WriteAsync("Sakin ol şampiyon! Çok hızlı istek atıyorsun, lütfen 10 saniye bekle.", cancellationToken: token);
+    };
+});
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -59,9 +91,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
     });
+
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
 app.UseSerilogRequestLogging();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
@@ -72,7 +106,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseRateLimiter();
+
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapControllers();
+
+app.MapControllers().RequireRateLimiting("SabitSinir");
+
 app.Run();
