@@ -1,14 +1,18 @@
-﻿using PortfoyTakipAPI.Models; // Varlik modelinin bulunduğu klasör
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using PortfoyTakipAPI.Models;
+using PortfoyTakipAPI.DTOs;
 
 namespace PortfoyTakipAPI.Repositories
 {
     public interface IVarlikRepository
     {
-        IEnumerable<Varlik> GetAll();         // Hepsini Getir (Read)
-        Varlik GetById(int id);               // Tekil Getir (Read)
-        void Add(Varlik varlik);              // Ekle (Create)
-        void Update(Varlik varlik);           // Güncelle (Update)
-        void Delete(int id);                  // Sil (Delete)
-        void Save();                          // Veritabanına Kaydet
+        IEnumerable<Varlik> GetAll();
+        Task<PagedResult<Varlik>> GetPagedVarliklarAsync(VarlikRequestParameters parameters);
+        Varlik GetById(int id);
+        void Add(Varlik varlik);
+        void Update(Varlik varlik);
+        void Delete(int id);
+        void Save();                   
     }
 }

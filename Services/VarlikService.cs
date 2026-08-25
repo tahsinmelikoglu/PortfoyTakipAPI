@@ -1,6 +1,9 @@
 ﻿using PortfoyTakipAPI.DTOs;
 using PortfoyTakipAPI.Models;
 using PortfoyTakipAPI.Repositories;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace PortfoyTakipAPI.Services
 {
@@ -8,7 +11,6 @@ namespace PortfoyTakipAPI.Services
     {
         private readonly IVarlikRepository _repository;
 
-        // Dependency Injection ile Kiler sorumlusunu Aşçıya veriyoruz
         public VarlikService(IVarlikRepository repository)
         {
             _repository = repository;
@@ -18,13 +20,26 @@ namespace PortfoyTakipAPI.Services
         {
             var varliklar = _repository.GetAll();
 
-            // Veritabanından gelen ham verileri DTO tepsisine diziyoruz
             return varliklar.Select(v => new VarlikDTO
             {
                 Id = v.Id,
                 Sembol = v.Sembol,
                 Miktar = v.Miktar,
             }).ToList();
+        }
+
+        public async Task<PagedResult<VarlikDTO>> GetPagedVarliklarAsync(VarlikRequestParameters parameters)
+        {
+            var pagedData = await _repository.GetPagedVarliklarAsync(parameters);
+
+            var dtoList = pagedData.Items.Select(v => new VarlikDTO
+            {
+                Id = v.Id,
+                Sembol = v.Sembol,
+                Miktar = v.Miktar,
+            }).ToList();
+
+            return new PagedResult<VarlikDTO>(dtoList, pagedData.TotalCount, pagedData.PageNumber, pagedData.PageSize);
         }
 
         public VarlikDTO GetById(int id)
@@ -42,7 +57,6 @@ namespace PortfoyTakipAPI.Services
 
         public void Add(VarlikCreateDTO varlikDto)
         {
-            // Dışarıdan gelen Id'siz DTO'yu, veritabanına yazılacak formata çeviriyoruz
             var yeniVarlik = new Varlik
             {
                 Sembol = varlikDto.Sembol,
@@ -51,29 +65,24 @@ namespace PortfoyTakipAPI.Services
             };
 
             _repository.Add(yeniVarlik);
-            _repository.Save(); // Kaydet emrini kiler sorumlusuna iletiyoruz
+            _repository.Save();
         }
         public void Update(VarlikUpdateDTO varlikDto)
         {
-            // 1. Kilerdeki (Veritabanındaki) mevcut varlığı bul
             var mevcutVarlik = _repository.GetById(varlikDto.Id);
 
-            // Eğer varlık gerçekten varsa güncelleme yap
             if (mevcutVarlik != null)
             {
-                // 2. Tepsideki yeni bilgileri mevcut kaydın üzerine yaz
                 mevcutVarlik.Sembol = varlikDto.Sembol;
                 mevcutVarlik.VarlikTuru = varlikDto.VarlikTuru;
                 mevcutVarlik.Miktar = varlikDto.Miktar;
 
-                // 3. Kiler sorumlusuna (Repository) güncellemeyi bildir ve kaydet
                 _repository.Update(mevcutVarlik);
                 _repository.Save();
             }
         }
         public void Delete(int id)
         {
-            // Kiler sorumlusuna (Repository) doğrudan silme emrini veriyoruz
             _repository.Delete(id);
             _repository.Save();
         }
