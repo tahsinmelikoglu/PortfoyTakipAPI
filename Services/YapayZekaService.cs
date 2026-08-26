@@ -6,6 +6,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace PortfoyTakipAPI.Services
 {
@@ -18,13 +19,16 @@ namespace PortfoyTakipAPI.Services
     {
         private readonly HttpClient _httpClient;
         private readonly IDistributedCache _cache;
-        private readonly IVarlikRepository _repository; 
+        private readonly IVarlikRepository _repository;
+        private readonly ISemanticSearchService _semanticSearchService; // YENİ: Vektör Arama Servisi
 
-        public YapayZekaService(HttpClient httpClient, IDistributedCache cache, IVarlikRepository repository)
+        // YAPICI METOT GÜNCELLENDİ (Bağımlılık eklendi)
+        public YapayZekaService(HttpClient httpClient, IDistributedCache cache, IVarlikRepository repository, ISemanticSearchService semanticSearchService)
         {
             _httpClient = httpClient;
             _cache = cache;
             _repository = repository;
+            _semanticSearchService = semanticSearchService;
         }
 
         public async Task<string> PortfoyAnaliziYapAsync(string prompt, string riskProfili)
@@ -34,7 +38,6 @@ namespace PortfoyTakipAPI.Services
             // 1. KİLERDEN (VERİTABANINDAN) GERÇEK VARLIKLARINI ÇEK
             var mevcutVarliklar = _repository.GetAll().ToList();
 
-            // 2. VERİLERİ YAPAY ZEKANIN OKUYABİLECEĞİ METNE ÇEVİR
             var portfoyOzeti = new StringBuilder();
             if (mevcutVarliklar.Any())
             {
@@ -48,41 +51,64 @@ namespace PortfoyTakipAPI.Services
                 portfoyOzeti.AppendLine("Kullanıcının portföyünde şu an hiçbir varlık bulunmamaktadır.");
             }
 
-            // 3. KULLANICI PROFİLİNE GÖRE KARAKTER SEÇİMİ (DİNAMİK PROMPTING)
+            // ====================================================================
+            // 2. YENİ: RAG MİMARİSİ (RETRIEVAL) - QDRANT'TAN KURALLARI ÇEK
+            // ====================================================================
+            var benzerKurallar = await _semanticSearchService.BenzerMetinleriBulAsync(prompt);
+            var kurallarMetni = new StringBuilder();
+
+            if (benzerKurallar.Any())
+            {
+                foreach (var kural in benzerKurallar)
+                {
+                    kurallarMetni.AppendLine($"- {kural}");
+                }
+            }
+            else
+            {
+                kurallarMetni.AppendLine("Bu soruyla eşleşen özel bir şirket kuralı bulunamadı.");
+            }
+
+            // 3. KULLANICI PROFİLİNE GÖRE KARAKTER SEÇİMİ
             string karakterTalimati = "";
             switch (riskProfili.ToLower())
             {
                 case "garantici":
-                    karakterTalimati = "Sen çok temkinli, riskten nefret eden ve anaparayı korumayı her şeyden üstün tutan geleneksel bir bankacısın. Kullanıcıya her zaman en güvenli ve risksiz yolu tavsiye et.";
+                    karakterTalimati = "Sen çok temkinli, riskten nefret eden ve anaparayı korumayı her şeyden üstün tutan geleneksel bir bankacısın.";
                     break;
                 case "agresif":
-                    karakterTalimati = "Sen Wall Street'te çalışan, yüksek risk ve yüksek getiri aşığı, çok cesur bir daytrader'sın. Kullanıcıya cesur hamleler, kripto paralar ve agresif büyüme stratejileri tavsiye et.";
+                    karakterTalimati = "Sen Wall Street'te çalışan, yüksek risk ve yüksek getiri aşığı, çok cesur bir daytrader'sın.";
                     break;
                 default:
                     karakterTalimati = "Sen mantıklı, riskleri dağıtmayı seven ve dengeli bir portföy yönetimi sunan modern bir finans uzmanısın.";
                     break;
             }
 
-            // 4. SİSTEM PROMPTUNU (KİŞİLİK VE KURALLARI) AYRI HAZIRLA
+            // ====================================================================
+            // 4. SİSTEM PROMPTUNU ZENGİNLEŞTİR (AUGMENTED GENERATION)
+            // ====================================================================
             string systemPrompt = $@"
 Sen profesyonel bir Türk portföy yönetim asistanısın. 
 {karakterTalimati}
-Görevin SADECE TÜRKÇE olarak finansal tavsiye vermektir. İngilizce veya başka bir dil kullanman KESİNLİKLE YASAKTIR.
-Hayal ürünü hisse senetleri uydurmayacaksın.
+Görevin SADECE TÜRKÇE olarak finansal tavsiye vermektir.
 
 Aşağıda kullanıcının veritabanından çekilen GERÇEK portföy verileri bulunmaktadır:
 [PORTFÖY BAŞLANGICI]
 {portfoyOzeti.ToString()}
 [PORTFÖY SONU]
 
-Sadece bu yukarıdaki gerçek verilere dayanarak kullanıcının sorusuna mantıklı, profesyonel ve tamamen Türkçe bir cevap ver.";
+Aşağıda ise şirketimizin uyman gereken kati kuralları bulunmaktadır:
+[ŞİRKET KURALLARI BAŞLANGICI]
+{kurallarMetni.ToString()}
+[ŞİRKET KURALLARI SONU]
 
-            // 5. İSTEĞİ OLLAMA API'SİNE UYGUN ŞEKİLDE BÖLEREK GÖNDER
+Sadece bu yukarıdaki gerçek verilere ve şirket kurallarına dayanarak kullanıcının sorusuna cevap ver.";
+
             var requestBody = new
             {
                 model = "llama3",
-                system = systemPrompt, // YAPAY ZEKANIN KİŞİLİĞİ VE KURALLARI (ASLA UNUTMAZ)
-                prompt = prompt,       // KULLANICININ SADECE SORUSU
+                system = systemPrompt,
+                prompt = prompt,
                 stream = false
             };
 

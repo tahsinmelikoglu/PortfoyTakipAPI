@@ -30,7 +30,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
 builder.Services.AddScoped<IVarlikRepository, VarlikRepository>();
 builder.Services.AddScoped<IVarlikService, VarlikService>();
 builder.Services.AddHttpClient<IYapayZekaService, YapayZekaService>();
-
+builder.Services.AddHttpClient<ISemanticSearchService, SemanticSearchService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
