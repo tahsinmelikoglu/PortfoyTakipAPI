@@ -25,7 +25,9 @@ namespace PortfoyTakipAPI.Controllers
                 return BadRequest(new { message = "Lütfen yapay zekaya sormak istediğiniz soruyu belirtin." });
             }
 
-            string aiYaniti = await _yapayZekaService.PortfoyAnaliziYapAsync(request.Soru);
+            // Eski Hali: string aiYaniti = await _yapayZekaService.PortfoyAnaliziYapAsync(request.Soru);
+            // Yeni Hali:
+            string aiYaniti = await _yapayZekaService.PortfoyAnaliziYapAsync(request.Soru, request.RiskProfili);
 
             return Ok(new
             {
@@ -38,5 +40,9 @@ namespace PortfoyTakipAPI.Controllers
     public class PromptRequest
     {
         public string Soru { get; set; }
+
+        // YENİ: Kullanıcının yatırım tarzını belirleyen alan
+        // (Örn: "Garantici", "Dengeli", "Agresif")
+        public string RiskProfili { get; set; } = "Dengeli"; // Varsayılan olarak Dengeli olsun
     }
 }

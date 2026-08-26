@@ -19,7 +19,7 @@ builder.Host.UseSerilog((context, configuration) =>
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// --- YENİ EKLENEN REDIS CACHE AYARI ---
+// --- REDIS CACHE AYARI ---
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = "localhost:6379"; // Docker'daki Redis'in adresi
@@ -107,8 +107,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseRateLimiter();
+// --- YENİ EKLENEN ARAYÜZ (FRONTEND) DESTEĞİ ---
+app.UseDefaultFiles(); // Varsayılan olarak index.html arar
+app.UseStaticFiles();  // wwwroot klasöründeki HTML, CSS, JS dosyalarını dışarıya açar
+// ----------------------------------------------
 
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 

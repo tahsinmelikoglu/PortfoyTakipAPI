@@ -11,14 +11,14 @@ namespace PortfoyTakipAPI.Services
 {
     public interface IYapayZekaService
     {
-        Task<string> PortfoyAnaliziYapAsync(string prompt);
+        Task<string> PortfoyAnaliziYapAsync(string prompt, string riskProfili);
     }
 
     public class YapayZekaService : IYapayZekaService
     {
         private readonly HttpClient _httpClient;
         private readonly IDistributedCache _cache;
-        private readonly IVarlikRepository _repository; // Kilere inip verileri alabilmemiz için gerekli
+        private readonly IVarlikRepository _repository; 
 
         public YapayZekaService(HttpClient httpClient, IDistributedCache cache, IVarlikRepository repository)
         {
@@ -27,7 +27,7 @@ namespace PortfoyTakipAPI.Services
             _repository = repository;
         }
 
-        public async Task<string> PortfoyAnaliziYapAsync(string prompt)
+        public async Task<string> PortfoyAnaliziYapAsync(string prompt, string riskProfili)
         {
             var url = "http://localhost:11434/api/generate";
 
@@ -48,26 +48,41 @@ namespace PortfoyTakipAPI.Services
                 portfoyOzeti.AppendLine("Kullanıcının portföyünde şu an hiçbir varlık bulunmamaktadır.");
             }
 
-            // 3. OLLAMA İÇİN ÇELİK GİBİ SERT BİR SİSTEM PROMPTU (KURALLAR BÜTÜNÜ) YAZIYORUZ
+            // 3. KULLANICI PROFİLİNE GÖRE KARAKTER SEÇİMİ (DİNAMİK PROMPTING)
+            string karakterTalimati = "";
+            switch (riskProfili.ToLower())
+            {
+                case "garantici":
+                    karakterTalimati = "Sen çok temkinli, riskten nefret eden ve anaparayı korumayı her şeyden üstün tutan geleneksel bir bankacısın. Kullanıcıya her zaman en güvenli ve risksiz yolu tavsiye et.";
+                    break;
+                case "agresif":
+                    karakterTalimati = "Sen Wall Street'te çalışan, yüksek risk ve yüksek getiri aşığı, çok cesur bir daytrader'sın. Kullanıcıya cesur hamleler, kripto paralar ve agresif büyüme stratejileri tavsiye et.";
+                    break;
+                default:
+                    karakterTalimati = "Sen mantıklı, riskleri dağıtmayı seven ve dengeli bir portföy yönetimi sunan modern bir finans uzmanısın.";
+                    break;
+            }
+
+            // 4. SİSTEM PROMPTUNU (KİŞİLİK VE KURALLARI) AYRI HAZIRLA
             string systemPrompt = $@"
 Sen profesyonel bir Türk portföy yönetim asistanısın. 
+{karakterTalimati}
 Görevin SADECE TÜRKÇE olarak finansal tavsiye vermektir. İngilizce veya başka bir dil kullanman KESİNLİKLE YASAKTIR.
-Hayal ürünü hisse senetleri (örneğin KARÇİL vb.) uydurmayacaksın.
+Hayal ürünü hisse senetleri uydurmayacaksın.
 
 Aşağıda kullanıcının veritabanından çekilen GERÇEK portföy verileri bulunmaktadır:
 [PORTFÖY BAŞLANGICI]
 {portfoyOzeti.ToString()}
 [PORTFÖY SONU]
 
-Sadece bu yukarıdaki gerçek verilere dayanarak, kullanıcının aşağıdaki sorusuna mantıklı, profesyonel ve tamamen Türkçe bir cevap ver.
+Sadece bu yukarıdaki gerçek verilere dayanarak kullanıcının sorusuna mantıklı, profesyonel ve tamamen Türkçe bir cevap ver.";
 
-Kullanıcı Sorusu: {prompt}";
-
-            // 4. İSTEĞİ HAZIRLA VE OLLAMA'YA GÖNDER
+            // 5. İSTEĞİ OLLAMA API'SİNE UYGUN ŞEKİLDE BÖLEREK GÖNDER
             var requestBody = new
             {
                 model = "llama3",
-                prompt = systemPrompt,
+                system = systemPrompt, // YAPAY ZEKANIN KİŞİLİĞİ VE KURALLARI (ASLA UNUTMAZ)
+                prompt = prompt,       // KULLANICININ SADECE SORUSU
                 stream = false
             };
 
