@@ -25,7 +25,7 @@ Staj programı final kriteri olan *"Token-Based Auth, kullanıcı yetkilendirmes
    * Sisteme yeni bir varlık/hisse eklendiği milisaniye, tarayıcılar sayfayı hiç yenilemeden (F5 yapmadan) `PortfoyHub` üzerinden anlık roket bildirimleri alır.
 3. **Akıllı Portföy Asistanı (Local LLM - Llama3):** 
    * Ollama entegrasyonu sayesinde veritabanındaki varlıklar yerel LLM motoruna beslenir; kullanıcılar portföyleri hakkında yapay zekadan anlık risk ve büyüme analizleri alabilir.
-4. **Jilet Gibi Konsol ve Hata Yönetimi:** 
+4. **Konsol ve Hata Yönetimi:** 
    * Global konfigürasyonlarla ondalıklı sayı hassasiyetleri (`precision`) sabitlenmiş, log kirlilikleri ve uyarılar sıfırlanmıştır.
 
 ---
