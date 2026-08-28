@@ -7,5 +7,7 @@
         public string Sembol { get; set; }
         public decimal Miktar { get; set; }
         public decimal Bakiye { get; set; }
+        public decimal AlisFiyati { get; set; }
+        public DateTime AlimTarihi { get; set; }
     }
 }

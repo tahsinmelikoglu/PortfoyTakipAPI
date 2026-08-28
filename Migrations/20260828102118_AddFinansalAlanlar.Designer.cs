@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PortfoyTakipAPI.Models;
 
@@ -11,9 +12,11 @@ using PortfoyTakipAPI.Models;
 namespace PortfoyTakipAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260828102118_AddFinansalAlanlar")]
+    partial class AddFinansalAlanlar
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,7 +41,6 @@ namespace PortfoyTakipAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("TalepFiyati")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -93,15 +95,12 @@ namespace PortfoyTakipAPI.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("AlisFiyati")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("Bakiye")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("Miktar")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Sembol")

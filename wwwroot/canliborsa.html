@@ -1,0 +1,57 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Canlı Portföy Ekranı</title>
+    <!-- SignalR kütüphanesini dışarıdan çekiyoruz -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+
+        .bildirim-kutusu {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
+            border-left: 5px solid #28a745;
+        }
+    </style>
+</head>
+<body>
+    <h2>📈 Canlı Borsa İşlemleri</h2>
+    <p>Kule dinleniyor... Yeni bir varlık eklendiğinde anında buraya düşecek!</p>
+
+    <!-- Bildirimlerin düşeceği alan -->
+    <div id="bildirim-alani"></div>
+
+    <script>
+        // 1. Kuleye bağlanıyoruz (Port numarana dikkat et, 7165 olmalı)
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("https://localhost:7165/portfoyhub")
+            .build();
+
+        // 2. Kule "BildirimAl" anonsu yaptığında ne olacağını söylüyoruz
+        connection.on("BildirimAl", function (baslik, mesaj) {
+            const alan = document.getElementById("bildirim-alani");
+            const yeniBildirim = `
+                <div class="bildirim-kutusu">
+                    <strong>${baslik}</strong><br/>
+                    ${mesaj}
+                </div>`;
+            alan.innerHTML = yeniBildirim + alan.innerHTML; // En üste ekle
+        });
+
+        // 3. Bağlantıyı başlat
+        connection.start().then(function () {
+            console.log("Kuleye bağlantı başarılı!");
+        }).catch(function (err) {
+            console.error("Bağlantı hatası:", err.toString());
+        });
+    </script>
+</body>
+</html>

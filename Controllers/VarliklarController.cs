@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PortfoyTakipAPI.CQRS.Commands;
+using PortfoyTakipAPI.CQRS.Queries; // YENİ: Queries klasörünü dahil ettik
 using PortfoyTakipAPI.DTOs;
 using PortfoyTakipAPI.Services;
 using System.Threading.Tasks;
@@ -12,26 +15,35 @@ namespace PortfoyTakipAPI.Controllers
     public class VarliklarController : ControllerBase
     {
         private readonly IVarlikService _varlikService;
+        private readonly IMediator _mediator;
 
-        public VarliklarController(IVarlikService varlikService)
+        public VarliklarController(IVarlikService varlikService, IMediator mediator)
         {
             _varlikService = varlikService;
+            _mediator = mediator;
         }
 
+        // =======================================================
+        // YENİ: CQRS ve MediatR ile çalışan Modern GetAll Metodu
+        // =======================================================
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] VarlikRequestParameters parameters)
         {
-            var result = await _varlikService.GetPagedVarliklarAsync(parameters);
+            // Parametreleri pakete koyup MediatR'a fırlatıyoruz
+            var query = new GetVarliklarQuery { Parameters = parameters };
+            var result = await _mediator.Send(query);
+
             return Ok(result);
         }
 
         [HttpPost]
-        public IActionResult Add(VarlikCreateDTO varlikDto)
+        public async Task<IActionResult> Add([FromBody] CreateVarlikCommand command)
         {
-            _varlikService.Add(varlikDto);
-            return Ok("Yeni varlık portföye başarıyla eklendi.");
+            var eklenenVarlik = await _mediator.Send(command);
+            return Ok(eklenenVarlik);
         }
 
+        // Kalan Update ve Delete metotları şimdilik eski sistemle çalışmaya devam ediyor
         [HttpPut("{id}")]
         public IActionResult Update(int id, VarlikUpdateDTO varlikDto)
         {
@@ -41,7 +53,6 @@ namespace PortfoyTakipAPI.Controllers
             }
 
             _varlikService.Update(varlikDto);
-
             return Ok("Varlık başarıyla güncellendi.");
         }
 

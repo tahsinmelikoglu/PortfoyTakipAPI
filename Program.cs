@@ -26,7 +26,9 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.InstanceName = "PortfoyAPI_"; // Önbellekteki verilerin başına eklenecek etiket
 });
 // --------------------------------------
-
+// MediatR kütüphanesini projeye dahil ediyoruz
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+builder.Services.AddSignalR();
 builder.Services.AddScoped<IVarlikRepository, VarlikRepository>();
 builder.Services.AddScoped<IVarlikService, VarlikService>();
 builder.Services.AddHttpClient<IYapayZekaService, YapayZekaService>();
@@ -115,7 +117,7 @@ app.UseStaticFiles();  // wwwroot klasöründeki HTML, CSS, JS dosyalarını dı
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseStaticFiles();
 app.MapControllers().RequireRateLimiting("SabitSinir");
-
+app.MapHub<PortfoyTakipAPI.Hubs.PortfoyHub>("/portfoyhub");
 app.Run();

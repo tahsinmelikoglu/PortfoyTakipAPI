@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PortfoyTakipAPI.Services;
+using System;
 using System.Threading.Tasks;
 
 namespace PortfoyTakipAPI.Controllers
@@ -53,6 +54,15 @@ namespace PortfoyTakipAPI.Controllers
             }
 
             return BadRequest("Bilgi öğrenilirken bir hata oluştu.");
+        }
+
+        // TEST METODU ŞİMDİ DOĞRU YERDE (CLASS'IN İÇİNDE)
+        [HttpGet("hata-test")]
+        [AllowAnonymous] // Sadece test edeceğimiz için Token sormasın
+        public IActionResult HataTest()
+        {
+            // Bilerek kritik bir veritabanı hatası simüle ediyoruz
+            throw new Exception("Kritik Sistem Hatası: Veritabanı bağlantısı koptu! SQL Server 30 saniyedir yanıt vermiyor.");
         }
     }
 
