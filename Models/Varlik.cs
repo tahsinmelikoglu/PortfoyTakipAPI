@@ -1,4 +1,7 @@
-﻿namespace PortfoyTakipAPI.Models
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace PortfoyTakipAPI.Models
 {
     public class Varlik
     {
@@ -9,5 +12,11 @@
         public decimal Bakiye { get; set; }
         public decimal AlisFiyati { get; set; }
         public DateTime AlimTarihi { get; set; }
+        [NotMapped]
+        public decimal GuncelFiyat { get; set; }
+
+        [Required(ErrorMessage = "Kullanıcı ID alanı boş bırakılamaz!")]
+        public string KullaniciId { get; set; }
+
     }
 }

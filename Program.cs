@@ -31,7 +31,11 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Progr
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IVarlikRepository, VarlikRepository>();
 builder.Services.AddScoped<IVarlikService, VarlikService>();
-builder.Services.AddHttpClient<IYapayZekaService, YapayZekaService>();
+builder.Services.AddHttpClient<IYapayZekaService, YapayZekaService>(client =>
+{
+    // Llama 3'ün derin düşünmesi için süreyi 180 saniyeye çıkarıyoruz
+    client.Timeout = TimeSpan.FromSeconds(180);
+});
 builder.Services.AddHttpClient<ISemanticSearchService, SemanticSearchService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>

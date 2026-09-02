@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Identity.Client;
 using PortfoyTakipAPI.Hubs;
 using PortfoyTakipAPI.Models;
 using PortfoyTakipAPI.Repositories;
@@ -15,6 +16,8 @@ namespace PortfoyTakipAPI.CQRS.Commands
         public string VarlikTuru { get; set; }
         public decimal Miktar { get; set; }
         public decimal AlisFiyati { get; set; }
+        public DateTime AlimTarihi  { get; set; }
+        public string KullaniciId { get; set; }
     }
 
     public class CreateVarlikCommandHandler : IRequestHandler<CreateVarlikCommand, Varlik>
@@ -38,7 +41,7 @@ namespace PortfoyTakipAPI.CQRS.Commands
                 Miktar = request.Miktar,
                 AlisFiyati = request.AlisFiyati,
                 Bakiye = request.Miktar * request.AlisFiyati,
-                AlimTarihi = DateTime.Now
+                AlimTarihi = request.AlimTarihi
             };
 
             // 1. Veritabanına kalıcı olarak kaydet

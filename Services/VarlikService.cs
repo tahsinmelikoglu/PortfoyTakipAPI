@@ -31,6 +31,8 @@ namespace PortfoyTakipAPI.Services
                 Id = v.Id,
                 Sembol = v.Sembol,
                 Miktar = v.Miktar,
+                AlisFiyati = v.AlisFiyati,
+                AlimTarihi = v.AlimTarihi
             }).ToList();
         }
 
@@ -110,6 +112,8 @@ namespace PortfoyTakipAPI.Services
                 mevcutVarlik.Sembol = varlikDto.Sembol;
                 mevcutVarlik.VarlikTuru = varlikDto.VarlikTuru;
                 mevcutVarlik.Miktar = varlikDto.Miktar;
+                mevcutVarlik.AlisFiyati = varlikDto.AlisFiyati;
+                mevcutVarlik.AlimTarihi = varlikDto.AlimTarihi;
 
                 _repository.Update(mevcutVarlik);
                 _repository.Save();

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PortfoyTakipAPI.Services;
 using System;
+using System.Security.Claims; // YENİ: JWT içindeki kimliği okumak için
 using System.Threading.Tasks;
 
 namespace PortfoyTakipAPI.Controllers
@@ -12,9 +13,8 @@ namespace PortfoyTakipAPI.Controllers
     public class YapayZekaController : ControllerBase
     {
         private readonly IYapayZekaService _yapayZekaService;
-        private readonly ISemanticSearchService _semanticSearchService; // YENİ: Vektör DB Servisimiz
+        private readonly ISemanticSearchService _semanticSearchService;
 
-        // YAPICI METOT GÜNCELLENDİ
         public YapayZekaController(IYapayZekaService yapayZekaService, ISemanticSearchService semanticSearchService)
         {
             _yapayZekaService = yapayZekaService;
@@ -29,7 +29,17 @@ namespace PortfoyTakipAPI.Controllers
                 return BadRequest(new { message = "Lütfen yapay zekaya sormak istediğiniz soruyu belirtin." });
             }
 
-            string aiYaniti = await _yapayZekaService.PortfoyAnaliziYapAsync(request.Soru, request.RiskProfili);
+            // --- YENİ EKLENEN GÜVENLİK DUVARI ---
+            // İstek atan kullanıcının Token'ı içinden kendi ID'sini yakalıyoruz
+            var kullaniciId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(kullaniciId))
+            {
+                return Unauthorized(new { message = "Geçersiz kullanıcı oturumu." });
+            }
+
+            // "oturum-123" yerine artık GERÇEK kullanıcı kimliğini gönderiyoruz
+            string aiYaniti = await _yapayZekaService.PortfoyAnaliziYapAsync(kullaniciId, request.Soru, request.RiskProfili);
 
             return Ok(new
             {
@@ -38,14 +48,10 @@ namespace PortfoyTakipAPI.Controllers
             });
         }
 
-        // YENİ: YAPAY ZEKAYA KURUMSAL BİLGİ/KURAL ÖĞRETME UCU
         [HttpPost("ogret")]
         public async Task<IActionResult> BilgiOgret([FromBody] OgretRequest request)
         {
-            // 1. Qdrant'ta kolleksiyon (tablo) yoksa oluştur
             await _semanticSearchService.VeritabaniHazirlaAsync();
-
-            // 2. Metni 768 boyutlu vektöre çevir ve Qdrant'a kaydet
             bool sonuc = await _semanticSearchService.MetniOgretAsync(request.Id, request.Metin);
 
             if (sonuc)
@@ -56,12 +62,10 @@ namespace PortfoyTakipAPI.Controllers
             return BadRequest("Bilgi öğrenilirken bir hata oluştu.");
         }
 
-        // TEST METODU ŞİMDİ DOĞRU YERDE (CLASS'IN İÇİNDE)
         [HttpGet("hata-test")]
-        [AllowAnonymous] // Sadece test edeceğimiz için Token sormasın
+        [AllowAnonymous]
         public IActionResult HataTest()
         {
-            // Bilerek kritik bir veritabanı hatası simüle ediyoruz
             throw new Exception("Kritik Sistem Hatası: Veritabanı bağlantısı koptu! SQL Server 30 saniyedir yanıt vermiyor.");
         }
     }
@@ -69,13 +73,9 @@ namespace PortfoyTakipAPI.Controllers
     public class PromptRequest
     {
         public string Soru { get; set; }
-
-        // Kullanıcının yatırım tarzını belirleyen alan
-        // (Örn: "Garantici", "Dengeli", "Agresif")
-        public string RiskProfili { get; set; } = "Dengeli"; // Varsayılan olarak Dengeli olsun
+        public string RiskProfili { get; set; } = "Dengeli";
     }
 
-    // YENİ: ÖĞRETME İSTEĞİ İÇİN DTO
     public class OgretRequest
     {
         public ulong Id { get; set; }

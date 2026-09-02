@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PortfoyTakipAPI.Models;
 
@@ -11,9 +12,11 @@ using PortfoyTakipAPI.Models;
 namespace PortfoyTakipAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260902074845_SeedHalkaArzData")]
+    partial class SeedHalkaArzData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -62,21 +65,9 @@ namespace PortfoyTakipAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("GerceklesenKatilimciSayisi")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("KatilimEndeksineUygunMu")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("KonsorsiyumLideri")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<decimal>("LotFiyati")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Sektor")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SirketAdi")
                         .IsRequired()
@@ -92,8 +83,8 @@ namespace PortfoyTakipAPI.Migrations
                     b.Property<DateTime>("TalepToplamaBitis")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("ToplamDagilacakLot")
-                        .HasColumnType("int");
+                    b.Property<long>("ToplamDagilacakLot")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -104,37 +95,34 @@ namespace PortfoyTakipAPI.Migrations
                         {
                             Id = 1,
                             BorsaKodu = "MCARD",
-                            KatilimEndeksineUygunMu = false,
                             LotFiyati = 25.00m,
                             SirketAdi = "Metropol Kurumsal Hizmetler",
                             Statu = "İşlem Gören",
                             TalepToplamaBaslangic = new DateTime(2026, 3, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TalepToplamaBitis = new DateTime(2026, 3, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            ToplamDagilacakLot = 30000000
+                            ToplamDagilacakLot = 30000000L
                         },
                         new
                         {
                             Id = 2,
                             BorsaKodu = "TKNJI",
-                            KatilimEndeksineUygunMu = false,
                             LotFiyati = 42.50m,
                             SirketAdi = "Teknoloji Gelecek A.Ş.",
                             Statu = "Talep Toplayan",
                             TalepToplamaBaslangic = new DateTime(2026, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TalepToplamaBitis = new DateTime(2026, 9, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            ToplamDagilacakLot = 15000000
+                            ToplamDagilacakLot = 15000000L
                         },
                         new
                         {
                             Id = 3,
                             BorsaKodu = "ENRGY",
-                            KatilimEndeksineUygunMu = false,
                             LotFiyati = 18.20m,
                             SirketAdi = "Yeşil Enerji Üretim",
                             Statu = "Yaklaşan",
                             TalepToplamaBaslangic = new DateTime(2026, 9, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TalepToplamaBitis = new DateTime(2026, 9, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            ToplamDagilacakLot = 55000000
+                            ToplamDagilacakLot = 55000000L
                         });
                 });
 

@@ -1,0 +1,519 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Halka Arz & Strateji Simülatörü — TahsinPortfoy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <style>
+        body {
+            background-color: #f4f7f6;
+            font-family: 'Inter', sans-serif;
+            color: #1e293b;
+            margin: 0;
+            padding-top: 90px;
+        }
+
+        .navbar-custom {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 72px;
+            background: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .navbar-brand-custom {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #fff;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .nav-menu-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+            .nav-menu-links a {
+                color: #94a3b8;
+                text-decoration: none;
+                font-size: 14px;
+                font-weight: 500;
+                transition: color 0.2s;
+            }
+
+                .nav-menu-links a:hover, .nav-menu-links a.active {
+                    color: #38c6ec;
+                }
+
+        .btn-cikis-custom {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+            .btn-cikis-custom:hover {
+                background: #dc2626;
+                border-color: #dc2626;
+            }
+
+        .dashboard-wrapper {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 20px 30px;
+        }
+
+        .custom-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            height: 100%;
+        }
+
+        /* --- BÜYÜTÜLMÜŞ AI CHAT PANEL --- */
+        #ai-panel-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.5);
+            z-index: 9998;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+            #ai-panel-overlay.active {
+                opacity: 1;
+                visibility: visible;
+            }
+
+        #ai-chat-panel {
+            position: fixed;
+            top: 0;
+            right: -620px;
+            width: 620px;
+            height: 100%;
+            background: #fff;
+            z-index: 9999;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+            transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+            #ai-chat-panel.active {
+                right: 0;
+            }
+
+        .ai-header {
+            padding: 24px 30px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ai-body {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: #f8fafc;
+        }
+
+        .ai-msg {
+            background: #fff;
+            padding: 18px 22px;
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 18px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #1e293b;
+        }
+
+        .ai-footer {
+            padding: 20px 30px;
+            border-top: 1px solid #f1f5f9;
+            background: #fff;
+        }
+
+        .ai-input-wrapper input {
+            font-size: 15px !important;
+            padding: 14px 20px !important;
+        }
+
+        /* --- HALKA ARZ ÖZEL STİLLERİ --- */
+        .arz-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+            .arz-item:hover {
+                background-color: #f8fafc;
+                transform: translateX(4px);
+                border-left: 4px solid #38c6ec;
+            }
+
+        .stat-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        /* Range Slider Özelleştirmesi */
+        input[type=range] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #e2e8f0;
+            outline: none;
+            -webkit-appearance: none;
+            margin: 15px 0;
+        }
+
+            input[type=range]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 22px;
+                height: 22px;
+                border-radius: 50%;
+                background: #0f172a;
+                cursor: pointer;
+                transition: transform 0.1s;
+            }
+
+                input[type=range]::-webkit-slider-thumb:hover {
+                    transform: scale(1.15);
+                }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR (Dashboard ile Birebir Aynı) -->
+    <header class="navbar-custom">
+        <a href="dashboard.html" class="navbar-brand-custom">
+            <svg style="width:26px; height:26px;" viewBox="0 0 26 25" fill="none">
+                <path d="M9.45 24.95 L7.07 24.09 L5.56 23.30 L3.33 21.03 L2.31 19.44 L0.74 16.05 L0.27 13.91 L0.29 11.25 L0.80 8.75 L1.95 6.20 L3.26 4.50 L5.15 2.67 L7.77 1.02 L9.91 0.18 L12.16 -0.20 L15.22 -0.16 L17.61 0.35 L19.30 1.06 L20.88 2.06 L22.23 3.37 L24.01 5.48 L24.76 6.58 L25.70 8.63 L26.00 10.35 L26.02 11.35 L25.54 12.12 L24.96 12.32 L22.35 12.36 L21.46 12.18 L20.78 11.85 L20.32 11.37 L19.45 9.56 L17.88 7.58 L16.59 6.60 L14.59 5.84 L13.24 5.69 L11.54 5.93 L10.47 6.44 L9.12 7.35 L7.92 8.50 L6.70 10.55 L6.26 12.65 L6.41 14.36 L7.14 15.86 L8.63 17.79 L12.57 20.70 L12.96 21.60 L13.13 22.82 L12.93 24.36 L12.65 24.86 L12.03 25.35 L11.27 25.42 L9.45 24.95 Z" fill="#38c6ec" />
+            </svg>
+            TahsinPortfoy
+        </a>
+
+        <div class="nav-menu-links">
+            <a href="dashboard.html" id="link-dashboard"><i class="bi bi-grid-1x2 me-1"></i> Portföyüm</a>
+            <a href="halkaarz.html" id="link-halkaarz" class="active fw-semibold text-white"><i class="bi bi-rocket-takeoff me-1"></i> Halka Arz</a>
+            <a href="#" onclick="toggleChat(true); return false;" class="text-info fw-semibold"><i class="bi bi-robot me-1"></i> Portföy AI Asistan</a>
+        </div>
+
+        <div class="d-flex align-items-center gap-4">
+            <button class="btn btn-link text-white p-0 position-relative shadow-none" title="Canlı Bildirimler (Kule)">
+                <i class="bi bi-bell fs-5"></i>
+                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-dark rounded-circle">
+                    <span class="visually-hidden">Yeni bildirim</span>
+                </span>
+            </button>
+            <button class="btn-cikis-custom" onclick="cikisYap()">Çıkış Yap</button>
+        </div>
+    </header>
+
+    <!-- İKİ SÜTUNLU HALKA ARZ & SİMÜLASYON İSKELETİ -->
+    <main class="dashboard-wrapper">
+        <div class="row g-4">
+
+            <!-- SOL SÜTUN: GÜNCEL HALKA ARZ TAKVİMİ -->
+            <div class="col-lg-6">
+                <div class="custom-card">
+                    <h5 class="fw-bold m-0 text-dark mb-3">Güncel Halka Arz Takvimi</h5>
+                    <p class="text-muted small mb-4">İncelemek istediğiniz şirketin üzerine tıklayarak analitik verileri yükleyin.</p>
+
+                    <div class="d-flex flex-column gap-2" id="halkaarz-listesi">
+                        <!-- Statik Örnek Kart 1 -->
+                        <div class="arz-item" onclick="sirketSec('ENRGY', 18.20, 'Enerji', 2850000, 2025000, 50000000)">
+                            <div>
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span class="fw-bold fs-6">ENRGY</span>
+                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-0.5 rounded-pill" style="font-size:11px;">Yaklaşan</span>
+                                </div>
+                                <span class="text-muted small">Yeşil Enerji Üretim</span>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold text-primary">18,20 TL</div>
+                                <div class="text-muted" style="font-size: 11px;">09.10.2026 - 09.12.2026</div>
+                            </div>
+                        </div>
+
+                        <!-- Statik Örnek Kart 2 -->
+                        <div class="arz-item" onclick="sirketSec('TKNJI', 42.50, 'Teknoloji', 3150000, 2025000, 85000000)">
+                            <div>
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span class="fw-bold fs-6">TKNJI</span>
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-0.5 rounded-pill" style="font-size:11px;">Talep Toplayan</span>
+                                </div>
+                                <span class="text-muted small">Teknoloji Gelecek A.Ş.</span>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold text-primary">42,50 TL</div>
+                                <div class="text-muted" style="font-size: 11px;">09.01.2026 - 09.03.2026</div>
+                            </div>
+                        </div>
+
+                        <!-- Statik Örnek Kart 3 -->
+                        <div class="arz-item" onclick="sirketSec('MCARD', 25.00, 'Finans', 1200000, 2025000, 25000000)">
+                            <div>
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span class="fw-bold fs-6">MCARD</span>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-0.5 rounded-pill" style="font-size:11px;">İşlem Gören</span>
+                                </div>
+                                <span class="text-muted small">Metropol Kurumsal Hizmetler</span>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold text-primary">25,00 TL</div>
+                                <div class="text-muted" style="font-size: 11px;">03.10.2026 - 03.12.2026</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SAĞ SÜTUN: STRATEJİ SİMÜLATÖRÜ & SEKTÖREL ZEKA -->
+            <div class="col-lg-6">
+                <div class="custom-card">
+                    <h5 class="fw-bold m-0 text-dark mb-1">Strateji Simülatörü</h5>
+                    <p class="text-muted small mb-4">Kâr al / Ana para kurtarma hesaplayıcısı</p>
+
+                    <!-- Sektörel Analiz Kutuları -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <div class="stat-box">
+                                <div class="text-muted fw-semibold mb-1" style="font-size: 11px;" id="ui-sektor-adi">SEKTÖR ORTALAMASI</div>
+                                <div class="fs-4 fw-bold text-dark"><span id="ui-sektor-ortalama">-</span> <span class="fs-6 fw-normal text-muted">Kişi</span></div>
+                                <div class="text-muted mt-1" style="font-size: 10px;">Son 5 arz katılım ortalaması</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-box">
+                                <div class="text-muted fw-semibold mb-1" style="font-size: 11px;">GENEL PİYASA ORTALAMASI</div>
+                                <div class="fs-4 fw-bold text-dark"><span id="ui-genel-ortalama">-</span> <span class="fs-6 fw-normal text-muted">Kişi</span></div>
+                                <div class="text-muted mt-1" style="font-size: 10px;">Bist geneli son 10 arz</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- İnteraktif Katılımcı Slider (Bar) Kutusu -->
+                    <div class="p-3 bg-light border rounded-3 mb-4" id="slider-kutu" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="small fw-semibold text-muted">KATILIMCI SAYISI SİMÜLASYONU</span>
+                            <span class="fw-bold text-info" id="slider-deger-text">2.850.000 Kişi</span>
+                        </div>
+                        <input type="range" id="katilimci-slider" min="300000" max="6000000" step="100000" oninput="sliderGuncelle()">
+                        <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top border-dashed">
+                            <span class="small fw-bold text-dark">Tahmini Düşecek Lot:</span>
+                            <span class="badge bg-dark px-3 py-2 fs-6" id="slider-sonuc-lot">0 Lot</span>
+                        </div>
+                    </div>
+
+                    <!-- Risk Profili Seçimi -->
+                    <label class="small fw-bold text-dark mb-2">Risk Profiliniz</label>
+                    <div class="row g-2 mb-4">
+                        <div class="col-4">
+                            <div class="p-2 border rounded text-center bg-white cursor-pointer" style="cursor:pointer;">
+                                <span class="d-fw-bold small fw-bold">Garantici</span>
+                                <span class="d-block text-muted" style="font-size:10px;">%50 Hedef</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 border border-dark rounded text-center bg-dark text-white cursor-pointer" style="cursor:pointer;">
+                                <span class="d-block small fw-bold">Dengeli</span>
+                                <span class="d-block text-white-50" style="font-size:10px;">%100 Hedef</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 border rounded text-center bg-white cursor-pointer" style="cursor:pointer;">
+                                <span class="d-block small fw-bold">Agresif</span>
+                                <span class="d-block text-muted" style="font-size:10px;">%200 Hedef</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input Satırı -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <label class="small fw-bold text-dark mb-1">Dağıtılan Lot</label>
+                            <input type="number" id="input-lot" class="form-control shadow-none" placeholder="Örn: 35">
+                        </div>
+                        <div class="col-6">
+                            <label class="small fw-bold text-dark mb-1">Arz Fiyatı (TL)</label>
+                            <input type="number" id="input-fiyat" class="form-control shadow-none" placeholder="Örn: 25.00" step="0.01">
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-dark w-100 py-3 fw-bold rounded-3 shadow-none" onclick="stratejiHesapla()">
+                        Stratejiyi Hesapla <i class="bi bi-calculator ms-1"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- BÜYÜTÜLMÜŞ AI CHAT PANEL (Dashboard ile Birebir Aynı Sağdan Kayan Drawer) -->
+    <div id="ai-panel-overlay" onclick="toggleChat(false)"></div>
+
+    <div id="ai-chat-panel">
+        <div class="ai-header">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-primary-subtle text-primary p-2 rounded-3 fs-4">🧠</div>
+                <div>
+                    <h5 class="fw-bold m-0">Portföy AI Asistan</h5>
+                    <small class="text-muted">Llama 3 Devrede (İzole Oturum)</small>
+                </div>
+            </div>
+            <button type="button" class="btn-close shadow-none fs-5" onclick="toggleChat(false)"></button>
+        </div>
+
+        <div class="ai-body" id="chat-body">
+            <div class="ai-msg">
+                Merhaba Tahsin! Halka arz verilerini ve sektörel zeka analizlerini senin için inceledim, nasıl yardımcı olabilirim?
+            </div>
+        </div>
+
+        <div class="ai-footer">
+            <form id="chat-form" class="input-group ai-input-wrapper">
+                <input type="text" id="chat-input" class="form-control shadow-none border-end-0 bg-light" autocomplete="off" placeholder="Hangi arza kaç kişi katılır?" />
+                <button type="submit" id="chat-send-btn" class="btn btn-dark px-4"><i class="bi bi-send fs-5"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT MOTORU -->
+    <script>
+        let aktifToplamLot = 0;
+
+        // Şirket Seçilince Çalışacak Fonksiyon
+        function sirketSec(sembol, fiyat, sektor, sektorOrt, genelOrt, toplamLot) {
+            aktifToplamLot = toplamLot;
+
+            document.getElementById('input-fiyat').value = fiyat;
+            document.getElementById('ui-sektor-adi').innerText = sektor.toUpperCase() + " SEKTÖRÜ";
+            document.getElementById('ui-sektor-ortalama').innerText = sektorOrt.toLocaleString('tr-TR');
+            document.getElementById('ui-genel-ortalama').innerText = genelOrt.toLocaleString('tr-TR');
+
+            const slider = document.getElementById('katilimci-slider');
+            slider.value = sektorOrt;
+
+            sliderGuncelle();
+            document.getElementById('slider-kutu').style.display = "block";
+        }
+
+        // Slider her oynatıldığında anlık hesaplama yapan fonksiyon
+        function sliderGuncelle() {
+            const sliderDeger = parseInt(document.getElementById('katilimci-slider').value);
+
+            document.getElementById('slider-deger-text').innerText = sliderDeger.toLocaleString('tr-TR') + " Kişi";
+
+            let dusecekLot = Math.floor(aktifToplamLot / sliderDeger);
+            document.getElementById('slider-sonuc-lot').innerText = dusecekLot + " Lot";
+
+            document.getElementById('input-lot').value = dusecekLot;
+        }
+
+        // Dashboard ile Aynı AI Asistan Çekmece Kontrolü
+        function toggleChat(forceState) {
+            const panel = document.getElementById('ai-chat-panel');
+            const overlay = document.getElementById('ai-panel-overlay');
+            const shouldOpen = typeof forceState === 'boolean' ? forceState : !panel.classList.contains('active');
+
+            panel.classList.toggle('active', shouldOpen);
+            overlay.classList.toggle('active', shouldOpen);
+
+            if (shouldOpen) setTimeout(() => document.getElementById('chat-input').focus(), 300);
+        }
+
+        function cikisYap() {
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        }
+
+        // Strateji Hesapla Butonu
+        async function stratejiHesapla() {
+            const lot = document.getElementById('input-lot').value;
+            const fiyat = document.getElementById('input-fiyat').value;
+
+            if (!lot || !fiyat) {
+                alert("Lütfen önce dağıtılan lot sayısını ve arz fiyatını girin!");
+                return;
+            }
+
+            console.log(`Hesaplanıyor... Lot: ${lot}, Fiyat: ${fiyat}`);
+            alert("Strateji simülasyonu başarılı! Backend entegrasyonu hazır.");
+        }
+
+        // AI Chat Gönderim Olayı
+        document.getElementById('chat-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const input = document.getElementById('chat-input');
+            const chatBody = document.getElementById('chat-body');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const userMsg = document.createElement('div');
+            userMsg.style.cssText = "background:#0f172a; color:white; padding:16px 20px; border-radius:14px 14px 0 14px; margin-bottom:18px; margin-left:auto; max-width:85%; font-size:15px; line-height:1.5;";
+            userMsg.textContent = message;
+            chatBody.appendChild(userMsg);
+            input.value = '';
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            const loading = document.createElement('div');
+            loading.className = 'ai-msg text-muted fst-italic';
+            loading.textContent = 'Llama 3 analiz ediyor... 🧠';
+            chatBody.appendChild(loading);
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            setTimeout(() => {
+                loading.remove();
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'ai-msg';
+                aiMsg.textContent = "Halka arz verilerini inceledim. Sektör ortalamalarına göre bu strateji dengeli portföy profilinizle uyumlu görünmektedir.";
+                chatBody.appendChild(aiMsg);
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
