@@ -1,0 +1,952 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Konsorsiyum Analizi — TahsinPortfoy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- AUTH GUARD (KAPI GÖREVLİSİ) -->
+    <script>
+        if (!localStorage.getItem('token')) {
+            window.location.replace('login.html');
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f4f7f6;
+            font-family: 'Inter', sans-serif;
+            color: #1e293b;
+            margin: 0;
+            padding-top: 90px;
+        }
+
+        .navbar-custom {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 72px;
+            background: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .navbar-brand-custom {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #fff;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .nav-menu-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+            .nav-menu-links a {
+                color: #94a3b8;
+                text-decoration: none;
+                font-size: 14px;
+                font-weight: 500;
+                transition: color 0.2s;
+            }
+
+                .nav-menu-links a:hover, .nav-menu-links a.active {
+                    color: #38c6ec;
+                }
+
+        .btn-cikis-custom {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+            .btn-cikis-custom:hover {
+                background: #dc2626;
+                border-color: #dc2626;
+            }
+
+        .dashboard-wrapper {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 20px 30px;
+        }
+
+        .custom-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            height: 100%;
+        }
+
+        /* --- AKORDEON ÖZEL STİLLERİ (Sol Menü İçin) --- */
+        .arz-item {
+            padding: 18px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .arz-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .arz-item:hover {
+            background-color: #f8fafc;
+        }
+
+        .arz-item.expanded {
+            background-color: #f8fafc;
+            border-left: 5px solid #0ea5e9;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            margin: 12px 0;
+            border-bottom: none;
+            padding: 20px;
+        }
+
+        .arz-details {
+            display: none;
+            padding-top: 15px;
+            margin-top: 15px;
+            border-top: 1px dashed #cbd5e1;
+            animation: slideDown 0.3s ease-out forwards;
+        }
+
+        .arz-item.expanded .arz-details {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- ÖZEL İSTATİSTİK KUTULARI --- */
+        .stat-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            height: 100%;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .stat-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-title {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1;
+        }
+
+        .table > :not(caption) > * > * {
+            padding: 14px 16px;
+            background-color: transparent;
+            border-bottom-color: #f1f5f9;
+        }
+
+        .no-select {
+            user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: color 0.2s;
+            margin-bottom: 20px;
+        }
+
+            .back-link:hover {
+                color: #0ea5e9;
+            }
+
+        /* --- BİLDİRİM AÇILIR MENÜSÜ (KULE) --- */
+        .notification-wrapper {
+            position: relative;
+        }
+
+        .notification-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 15px;
+            width: 320px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            display: none;
+            flex-direction: column;
+            z-index: 1001;
+            overflow: hidden;
+            transform-origin: top right;
+        }
+
+            .notification-dropdown.show {
+                display: flex;
+                animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+        .notif-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            font-weight: 700;
+            color: #1e293b;
+            background: #f8fafc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notif-body {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .notif-item {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            transition: background 0.2s;
+        }
+
+            .notif-item:hover {
+                background: #f8fafc;
+            }
+
+            .notif-item .icon {
+                font-size: 18px;
+                color: #0ea5e9;
+                margin-top: 2px;
+            }
+
+            .notif-item .text {
+                font-size: 13px;
+                color: #475569;
+                line-height: 1.5;
+            }
+
+            .notif-item .time {
+                font-size: 11px;
+                color: #94a3b8;
+                display: block;
+                margin-top: 4px;
+            }
+
+        /* --- YENİ PROFİL AÇILIR MENÜSÜ (DROPDOWN) --- */
+        .profile-wrapper {
+            position: relative;
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 15px;
+            width: 250px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            display: none;
+            flex-direction: column;
+            z-index: 1001;
+            overflow: hidden;
+            transform-origin: top right;
+        }
+
+            .profile-dropdown.show {
+                display: flex;
+                animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+        .profile-header {
+            padding: 20px;
+            border-bottom: 1px solid #f1f5f9;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .profile-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #38c6ec;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .profile-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1e293b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .profile-email {
+            font-size: 11px;
+            color: #64748b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .profile-menu {
+            padding: 10px 0;
+        }
+
+            .profile-menu a {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 10px 20px;
+                color: #475569;
+                text-decoration: none;
+                font-size: 13px;
+                font-weight: 500;
+                transition: background 0.2s, color 0.2s;
+            }
+
+                .profile-menu a:hover {
+                    background: #f8fafc;
+                    color: #0f172a;
+                }
+
+                .profile-menu a.text-danger:hover {
+                    background: #fef2f2;
+                    color: #dc2626;
+                }
+
+            .profile-menu i {
+                font-size: 16px;
+            }
+
+        /* --- BÜYÜTÜLMÜŞ AI CHAT PANEL --- */
+        #ai-panel-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.5);
+            z-index: 9998;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+            #ai-panel-overlay.active {
+                opacity: 1;
+                visibility: visible;
+            }
+
+        #ai-chat-panel {
+            position: fixed;
+            top: 0;
+            right: -620px;
+            width: 620px;
+            height: 100%;
+            background: #fff;
+            z-index: 9999;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+            transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+            #ai-chat-panel.active {
+                right: 0;
+            }
+
+        .ai-header {
+            padding: 24px 30px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ai-body {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: #f8fafc;
+        }
+
+        .ai-msg {
+            background: #fff;
+            padding: 18px 22px;
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 18px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #1e293b;
+        }
+
+        .ai-footer {
+            padding: 20px 30px;
+            border-top: 1px solid #f1f5f9;
+            background: #fff;
+        }
+
+        .ai-input-wrapper input {
+            font-size: 15px !important;
+            padding: 14px 20px !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="navbar-custom">
+        <a href="dashboard.html" class="navbar-brand-custom">
+            <svg style="width:26px; height:26px;" viewBox="0 0 26 25" fill="none">
+                <path d="M9.45 24.95 L7.07 24.09 L5.56 23.30 L3.33 21.03 L2.31 19.44 L0.74 16.05 L0.27 13.91 L0.29 11.25 L0.80 8.75 L1.95 6.20 L3.26 4.50 L5.15 2.67 L7.77 1.02 L9.91 0.18 L12.16 -0.20 L15.22 -0.16 L17.61 0.35 L19.30 1.06 L20.88 2.06 L22.23 3.37 L24.01 5.48 L24.76 6.58 L25.70 8.63 L26.00 10.35 L26.02 11.35 L25.54 12.12 L24.96 12.32 L22.35 12.36 L21.46 12.18 L20.78 11.85 L20.32 11.37 L19.45 9.56 L17.88 7.58 L16.59 6.60 L14.59 5.84 L13.24 5.69 L11.54 5.93 L10.47 6.44 L9.12 7.35 L7.92 8.50 L6.70 10.55 L6.26 12.65 L6.41 14.36 L7.14 15.86 L8.63 17.79 L12.57 20.70 L12.96 21.60 L13.13 22.82 L12.93 24.36 L12.65 24.86 L12.03 25.35 L11.27 25.42 L9.45 24.95 Z" fill="#38c6ec" />
+            </svg>
+            TahsinPortfoy
+        </a>
+
+        <!-- STANDART MENÜ (Konsorsiyum Liderleri aktif) -->
+        <div class="nav-menu-links">
+            <a href="dashboard.html" id="link-dashboard"><i class="bi bi-grid-1x2 me-1"></i> Portföyüm</a>
+            <a href="halkaarz.html" id="link-halkaarz"><i class="bi bi-rocket-takeoff me-1"></i> Halka Arz</a>
+            <a href="konsorsiyum.html" id="link-konsorsiyum" class="active fw-semibold text-white"><i class="bi bi-bank me-1"></i> Konsorsiyum Liderleri</a>
+            <a href="#" onclick="toggleChat(true); return false;" class="text-info fw-semibold"><i class="bi bi-robot me-1"></i> Portföy AI Asistan</a>
+        </div>
+
+        <div class="d-flex align-items-center gap-4">
+
+            <!-- BİLDİRİM KULESİ -->
+            <div class="notification-wrapper">
+                <button class="btn btn-link text-white p-0 position-relative shadow-none" title="Canlı Bildirimler" onclick="toggleBildirimler(event)">
+                    <i class="bi bi-bell fs-5"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-dark rounded-circle"></span>
+                </button>
+                <div class="notification-dropdown" id="bildirim-kutusu">
+                    <div class="notif-header">
+                        <span>Bildirim Merkezi</span>
+                        <i class="bi bi-check2-all text-primary" style="cursor:pointer;" title="Tümünü Okundu İşaretle"></i>
+                    </div>
+                    <div class="notif-body">
+                        <div class="notif-item">
+                            <i class="bi bi-info-circle-fill icon"></i>
+                            <div>
+                                <div class="text">Şu an yeni veya okunmamış bir bildiriminiz bulunmuyor. Sistem güncel.</div>
+                                <span class="time">Şimdi</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- YENİ PROFİL AÇILIR MENÜSÜ -->
+            <div class="profile-wrapper">
+                <button class="btn p-0 border-0 shadow-none" onclick="toggleProfil(event)">
+                    <div class="bg-info bg-opacity-25 text-info rounded-circle d-flex align-items-center justify-content-center border border-info border-opacity-50" style="width: 36px; height: 36px; font-weight: 600; transition: all 0.2s;" title="Hesabım">
+                        TM
+                    </div>
+                </button>
+                <div class="profile-dropdown" id="profil-kutusu">
+                    <div class="profile-header">
+                        <div class="profile-avatar">TM</div>
+                        <div class="profile-info">
+                            <span class="profile-name">Tahsin Melikoğlu</span>
+                            <span class="profile-email">tahsin.melikoglu@tahsinportfoy.com</span>
+                        </div>
+                    </div>
+                    <div class="profile-menu">
+                        <a href="#"><i class="bi bi-person"></i> Profil Bilgileri</a>
+                        <a href="#"><i class="bi bi-gear"></i> Hesap Ayarları</a>
+                        <a href="#"><i class="bi bi-shield-check"></i> Güvenlik</a>
+                        <div class="border-top my-2 border-dashed" style="border-color: #f1f5f9;"></div>
+                        <a href="#" class="text-danger" onclick="cikisYap()"><i class="bi bi-box-arrow-right"></i> Çıkış Yap</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </header>
+
+    <main class="dashboard-wrapper">
+
+        <a href="halkaarz.html" class="back-link"><i class="bi bi-arrow-left"></i> Halka Arz Simülatörüne Dön</a>
+
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <div class="bg-white border rounded-3 p-3 shadow-sm d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+                <i class="bi bi-bank fs-2 text-primary"></i>
+            </div>
+            <div>
+                <h3 class="fw-bold m-0 text-dark" id="kurum-adi">Kurum İstatistikleri</h3>
+                <p class="text-muted small m-0">Konsorsiyum liderinin geçmiş halka arz performans analizi</p>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-box">
+                    <div class="stat-icon bg-primary-subtle text-primary"><i class="bi bi-briefcase-fill"></i></div>
+                    <div class="stat-content">
+                        <span class="stat-title">Yönetilen Arz</span>
+                        <span class="stat-value" id="stat-arz-sayisi">-</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-box">
+                    <div class="stat-icon bg-success-subtle text-success"><i class="bi bi-graph-up-arrow"></i></div>
+                    <div class="stat-content">
+                        <span class="stat-title">Ortalama Tavan</span>
+                        <span class="stat-value" id="stat-tavan">-</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-box">
+                    <div class="stat-icon bg-info-subtle text-info"><i class="bi bi-cash-stack"></i></div>
+                    <div class="stat-content">
+                        <span class="stat-title">Ortalama Getiri</span>
+                        <span class="stat-value" id="stat-getiri">-</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-box">
+                    <div class="stat-icon bg-warning-subtle text-warning"><i class="bi bi-star-fill"></i></div>
+                    <div class="stat-content">
+                        <span class="stat-title">Başarı Oranı</span>
+                        <span class="stat-value" id="stat-basari">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="custom-card p-0 overflow-hidden">
+                    <div class="p-4 border-bottom bg-light">
+                        <h5 class="fw-bold m-0 text-dark mb-1">Kurumlar</h5>
+                        <p class="text-muted small m-0">Detaylı analiz için kurum seçin.</p>
+                    </div>
+
+                    <div class="d-flex flex-column p-3" id="kurum-listesi">
+
+                        <div class="arz-item no-select" id="item-ziraat" onclick="kurumSec('Ziraat Yatırım')">
+                            <div class="arz-summary">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                                        <i class="bi bi-bank fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <span class="fw-bold fs-6 d-block text-dark">Ziraat Yatırım</span>
+                                        <span class="text-muted" style="font-size: 11px;">Devlet Bankası İştiraki</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="arz-details text-secondary" style="font-size: 13px; line-height: 1.5;">
+                                Ziraat Bankası iştiraki olarak kurulan kurum, özellikle enerji ve ağır sanayi sektörü arzlarında piyasa lideri konumundadır. Güvenli liman arayan yatırımcıların ilk tercihidir.
+                            </div>
+                        </div>
+
+                        <div class="arz-item no-select" id="item-garanti" onclick="kurumSec('Garanti BBVA')">
+                            <div class="arz-summary">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                                        <i class="bi bi-building fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <span class="fw-bold fs-6 d-block text-dark">Garanti BBVA</span>
+                                        <span class="text-muted" style="font-size: 11px;">Özel Sermayeli Banka</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="arz-details text-secondary" style="font-size: 13px; line-height: 1.5;">
+                                Yabancı ortaklı yapısı sayesinde özellikle teknoloji ve perakende sektörlerindeki halka arzlarda güçlü yabancı talebi toplayabilen dinamik aracı kurumdur.
+                            </div>
+                        </div>
+
+                        <div class="arz-item no-select" id="item-is" onclick="kurumSec('İş Yatırım')">
+                            <div class="arz-summary">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="bg-info-subtle text-info rounded-circle d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                                        <i class="bi bi-wallet2 fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <span class="fw-bold fs-6 d-block text-dark">İş Yatırım</span>
+                                        <span class="text-muted" style="font-size: 11px;">Özel Sermayeli Banka</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="arz-details text-secondary" style="font-size: 13px; line-height: 1.5;">
+                                Türkiye'nin en köklü ve hacimli aracı kurumlarından biridir. Dev holdinglerin ve lojistik firmalarının yüksek montanlı arzlarını başarıyla yönetmesiyle bilinir.
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8" id="detay-alani" style="display: none;">
+                <div class="row g-4">
+                    <div class="col-lg-7">
+                        <div class="custom-card h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h6 class="fw-bold m-0 text-dark">Geçmiş Halka Arz Performansları</h6>
+                                <button class="btn btn-sm btn-outline-secondary shadow-none"><i class="bi bi-filter"></i> Filtrele</button>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table align-middle text-nowrap m-0">
+                                    <thead>
+                                        <tr class="text-muted small text-uppercase" style="font-size: 11px;">
+                                            <th>Sembol</th>
+                                            <th>Tarih</th>
+                                            <th>Tavan Serisi</th>
+                                            <th>Max. Getiri</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="gecmis-arzlar-tablosu">
+                                        <!-- JS İle Dinamik Dolacak -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-5">
+                        <div class="custom-card h-100 d-flex flex-column">
+                            <h6 class="fw-bold m-0 text-dark mb-4">Sektörel Ağırlık</h6>
+                            <div id="sektorel-dagilim-alani" class="d-flex flex-column gap-3">
+                                <!-- JS İle Dinamik Dolacak -->
+                            </div>
+                            <div class="mt-auto pt-3 mt-3 border-top border-dashed">
+                                <div class="text-muted" style="font-size: 10px;">
+                                    <i class="bi bi-info-circle text-info me-1"></i> Analizler son 3 yıllık borsa verileri baz alınarak hesaplanmıştır.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- AI CHAT PANEL -->
+    <div id="ai-panel-overlay" onclick="toggleChat(false)"></div>
+    <div id="ai-chat-panel">
+        <div class="ai-header">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-primary-subtle text-primary p-2 rounded-3 fs-4">🧠</div>
+                <div>
+                    <h5 class="fw-bold m-0">Portföy AI Asistan</h5>
+                    <small class="text-muted">Llama 3 Devrede (İzole Oturum)</small>
+                </div>
+            </div>
+            <button type="button" class="btn-close shadow-none fs-5" onclick="toggleChat(false)"></button>
+        </div>
+        <div class="ai-body" id="chat-body">
+            <div class="ai-msg">
+                Merhaba Tahsin! İncelediğin kurumun geçmiş halka arz performanslarını ve sektörel başarı analizlerini veritabanımdan getirdim. Soruların var mı?
+            </div>
+        </div>
+        <div class="ai-footer">
+            <form id="chat-form" class="input-group ai-input-wrapper">
+                <input type="text" id="chat-input" class="form-control shadow-none border-end-0 bg-light" autocomplete="off" placeholder="Bu kurum enerji arzlarında başarılı mı?" />
+                <button type="submit" id="chat-send-btn" class="btn btn-dark px-4"><i class="bi bi-send fs-5"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- BOOTSTRAP JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JAVASCRIPT BÖLÜMÜ -->
+    <script>
+        // YENİ: Profil Menüsünü Açma Kodu
+        function toggleProfil(event) {
+            event.stopPropagation();
+            const kutu = document.getElementById('profil-kutusu');
+
+            // Eğer bildirim kutusu açıksa onu kapat
+            const bildirim = document.getElementById('bildirim-kutusu');
+            if (bildirim) bildirim.classList.remove('show');
+
+            kutu.classList.toggle('show');
+        }
+
+        // Bildirim Kutusu
+        function toggleBildirimler(event) {
+            event.stopPropagation();
+            const kutu = document.getElementById('bildirim-kutusu');
+
+            // Eğer profil kutusu açıksa onu kapat
+            const profil = document.getElementById('profil-kutusu');
+            if (profil) profil.classList.remove('show');
+
+            kutu.classList.toggle('show');
+        }
+
+        // Sayfada boşluğa tıklayınca açık olan menüleri kapat
+        document.addEventListener('click', function (event) {
+            const notifWrapper = document.querySelector('.notification-wrapper');
+            const notifKutu = document.getElementById('bildirim-kutusu');
+            if (notifWrapper && !notifWrapper.contains(event.target)) {
+                if (notifKutu) notifKutu.classList.remove('show');
+            }
+
+            const profWrapper = document.querySelector('.profile-wrapper');
+            const profKutu = document.getElementById('profil-kutusu');
+            if (profWrapper && !profWrapper.contains(event.target)) {
+                if (profKutu) profKutu.classList.remove('show');
+            }
+        });
+
+        function toggleChat(forceState) {
+            const panel = document.getElementById('ai-chat-panel');
+            const overlay = document.getElementById('ai-panel-overlay');
+            const shouldOpen = typeof forceState === 'boolean' ? forceState : !panel.classList.contains('active');
+            panel.classList.toggle('active', shouldOpen);
+            overlay.classList.toggle('active', shouldOpen);
+            if (shouldOpen) setTimeout(() => document.getElementById('chat-input').focus(), 300);
+        }
+
+        function cikisYap() {
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        }
+
+        // Dummy Konsorsiyum Veritabanı
+        const kurumVerileri = {
+            'Ziraat Yatırım': {
+                id: 'ziraat',
+                arzSayisi: 24, tavan: '6.4', getiri: '%145', basari: '%92',
+                gecmis: [
+                    { kod: 'ASTOR', tarih: 'Ocak 2023', tavan: '8 Tavan', getiri: '%210' },
+                    { kod: 'KALES', tarih: 'Temmuz 2023', tavan: '5 Tavan', getiri: '%115' },
+                    { kod: 'ENRGY', tarih: 'Ekim 2026', tavan: 'Bekleniyor', getiri: '-' }
+                ],
+                sektorler: [
+                    { ad: 'Enerji', oran: 45, renk: 'success' },
+                    { ad: 'Üretim/Sanayi', oran: 35, renk: 'primary' },
+                    { ad: 'Gıda', oran: 20, renk: 'info' }
+                ]
+            },
+            'Garanti BBVA': {
+                id: 'garanti',
+                arzSayisi: 18, tavan: '5.1', getiri: '%95', basari: '%85',
+                gecmis: [
+                    { kod: 'MIATK', tarih: 'Kasım 2021', tavan: '9 Tavan', getiri: '%280' },
+                    { kod: 'OBASE', tarih: 'Şubat 2022', tavan: '4 Tavan', getiri: '%65' },
+                    { kod: 'TKNJI', tarih: 'Ocak 2026', tavan: 'Devam Ediyor', getiri: '-' }
+                ],
+                sektorler: [
+                    { ad: 'Teknoloji / Bilişim', oran: 55, renk: 'primary' },
+                    { ad: 'Finans', oran: 25, renk: 'warning' },
+                    { ad: 'Perakende', oran: 20, renk: 'danger' }
+                ]
+            },
+            'İş Yatırım': {
+                id: 'is',
+                arzSayisi: 32, tavan: '7.2', getiri: '%180', basari: '%95',
+                gecmis: [
+                    { kod: 'THYAO', tarih: 'Geçmiş', tavan: '-', getiri: '+%500' },
+                    { kod: 'SISE', tarih: 'Geçmiş', tavan: '-', getiri: '+%400' },
+                    { kod: 'MCARD', tarih: 'Ekim 2026', tavan: '6 Tavan', getiri: '%135' }
+                ],
+                sektorler: [
+                    { ad: 'Holding / Finans', oran: 40, renk: 'dark' },
+                    { ad: 'Ulaşım / Lojistik', oran: 40, renk: 'info' },
+                    { ad: 'Hizmet', oran: 20, renk: 'success' }
+                ]
+            }
+        };
+
+        const varsayilanVeri = {
+            arzSayisi: '-', tavan: '-', getiri: '-', basari: '-',
+            gecmis: [],
+            sektorler: []
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            let kurumAdi = urlParams.get('lider');
+
+            if (kurumAdi && kurumVerileri[kurumAdi]) {
+                kurumSec(kurumAdi);
+            } else {
+                kurumSec('Ziraat Yatırım');
+            }
+        });
+
+        function kurumSec(kurumAdi) {
+            const data = kurumVerileri[kurumAdi] || varsayilanVeri;
+
+            document.querySelectorAll('.arz-item').forEach(item => item.classList.remove('expanded'));
+
+            if (data.id) {
+                const itemEl = document.getElementById('item-' + data.id);
+                if (itemEl) itemEl.classList.add('expanded');
+            }
+
+            document.getElementById('kurum-adi').innerText = kurumAdi + ' İstatistikleri';
+            document.getElementById('stat-arz-sayisi').innerText = data.arzSayisi;
+            document.getElementById('stat-tavan').innerText = data.tavan;
+            document.getElementById('stat-getiri').innerText = data.getiri;
+            document.getElementById('stat-basari').innerText = data.basari;
+
+            const tbody = document.getElementById('gecmis-arzlar-tablosu');
+            if (data.gecmis.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">Bu kuruma ait geçmiş kayıt bulunamadı.</td></tr>`;
+            } else {
+                let rows = '';
+                data.gecmis.forEach(item => {
+                    rows += `
+                                <tr>
+                                    <td><span class="fw-bold text-dark">${item.kod}</span></td>
+                                    <td class="text-muted" style="font-size:12px;">${item.tarih}</td>
+                                    <td><span class="badge bg-light text-dark border">${item.tavan}</span></td>
+                                    <td class="fw-semibold text-success">${item.getiri}</td>
+                                </tr>
+                            `;
+                });
+                tbody.innerHTML = rows;
+            }
+
+            const sektorDiv = document.getElementById('sektorel-dagilim-alani');
+            if (data.sektorler.length === 0) {
+                sektorDiv.innerHTML = '<span class="text-muted small">Veri yok.</span>';
+            } else {
+                let bars = '';
+                data.sektorler.forEach(sek => {
+                    bars += `
+                                <div>
+                                    <div class="d-flex justify-content-between small fw-medium mb-1 text-dark" style="font-size: 12px;">
+                                        <span>${sek.ad}</span><span>%${sek.oran}</span>
+                                    </div>
+                                    <div class="progress" style="height: 6px; border-radius: 3px;">
+                                        <div class="progress-bar bg-${sek.renk}" style="width: ${sek.oran}%"></div>
+                                    </div>
+                                </div>
+                            `;
+                });
+                sektorDiv.innerHTML = bars;
+            }
+
+            document.getElementById('detay-alani').style.display = 'block';
+        }
+
+        document.getElementById('chat-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const input = document.getElementById('chat-input');
+            const chatBody = document.getElementById('chat-body');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const userMsg = document.createElement('div');
+            userMsg.style.cssText = "background:#0f172a; color:white; padding:16px 20px; border-radius:14px 14px 0 14px; margin-bottom:18px; margin-left:auto; max-width:85%; font-size:15px; line-height:1.5;";
+            userMsg.textContent = message;
+            chatBody.appendChild(userMsg);
+            input.value = '';
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            const loading = document.createElement('div');
+            loading.className = 'ai-msg text-muted fst-italic';
+            loading.textContent = 'Llama 3 analiz ediyor... 🧠';
+            chatBody.appendChild(loading);
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            setTimeout(() => {
+                loading.remove();
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'ai-msg';
+                aiMsg.textContent = "Sorduğun kurumun geçmiş verilerine göre, özellikle belirtilen sektördeki halka arzlarda yatırımcılarına istikrarlı bir getiri sağladığını söyleyebilirim.";
+                chatBody.appendChild(aiMsg);
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

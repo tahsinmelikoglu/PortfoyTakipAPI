@@ -11,6 +11,13 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
+    <!-- AUTH GUARD (KAPI GÖREVLİSİ) -->
+    <script>
+        if (!localStorage.getItem('token')) {
+            window.location.replace('login.html');
+        }
+    </script>
+
     <style>
         body {
             background-color: #f4f7f6;
@@ -62,23 +69,6 @@
                 .nav-menu-links a:hover, .nav-menu-links a.active {
                     color: #38c6ec;
                 }
-
-        .btn-cikis-custom {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 8px 18px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-            .btn-cikis-custom:hover {
-                background: #dc2626;
-                border-color: #dc2626;
-            }
 
         .dashboard-wrapper {
             max-width: 1300px;
@@ -170,23 +160,251 @@
             padding: 14px 20px !important;
         }
 
-        /* --- HALKA ARZ ÖZEL STİLLERİ --- */
-        .arz-item {
+        /* --- BİLDİRİM AÇILIR MENÜSÜ (KULE) --- */
+        .notification-wrapper {
+            position: relative;
+        }
+
+        .notification-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 15px;
+            width: 320px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            display: none;
+            flex-direction: column;
+            z-index: 1001;
+            overflow: hidden;
+            transform-origin: top right;
+        }
+
+            .notification-dropdown.show {
+                display: flex;
+                animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .notif-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            font-weight: 700;
+            color: #1e293b;
+            background: #f8fafc;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 14px;
-            border-bottom: 1px solid #f1f5f9;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.2s;
         }
 
-            .arz-item:hover {
-                background-color: #f8fafc;
-                transform: translateX(4px);
-                border-left: 4px solid #38c6ec;
+        .notif-body {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .notif-item {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            transition: background 0.2s;
+        }
+
+            .notif-item:hover {
+                background: #f8fafc;
             }
+
+            .notif-item:last-child {
+                border-bottom: none;
+            }
+
+            .notif-item .icon {
+                font-size: 18px;
+                color: #0ea5e9;
+                margin-top: 2px;
+            }
+
+            .notif-item .text {
+                font-size: 13px;
+                color: #475569;
+                line-height: 1.5;
+            }
+
+            .notif-item .time {
+                font-size: 11px;
+                color: #94a3b8;
+                display: block;
+                margin-top: 4px;
+            }
+
+        /* --- YENİ PROFİL AÇILIR MENÜSÜ (DROPDOWN) --- */
+        .profile-wrapper {
+            position: relative;
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 15px;
+            width: 250px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            display: none;
+            flex-direction: column;
+            z-index: 1001;
+            overflow: hidden;
+            transform-origin: top right;
+        }
+
+            .profile-dropdown.show {
+                display: flex;
+                animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+        .profile-header {
+            padding: 20px;
+            border-bottom: 1px solid #f1f5f9;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .profile-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #38c6ec;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .profile-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1e293b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .profile-email {
+            font-size: 11px;
+            color: #64748b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .profile-menu {
+            padding: 10px 0;
+        }
+
+            .profile-menu a {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 10px 20px;
+                color: #475569;
+                text-decoration: none;
+                font-size: 13px;
+                font-weight: 500;
+                transition: background 0.2s, color 0.2s;
+            }
+
+                .profile-menu a:hover {
+                    background: #f8fafc;
+                    color: #0f172a;
+                }
+
+                .profile-menu a.text-danger:hover {
+                    background: #fef2f2;
+                    color: #dc2626;
+                }
+
+            .profile-menu i {
+                font-size: 16px;
+            }
+
+        /* --- HALKA ARZ AKORDEON STİLLERİ --- */
+        .arz-item {
+            padding: 18px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .arz-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .arz-item:hover {
+            background-color: #f8fafc;
+        }
+
+        .arz-item.expanded {
+            background-color: #f8fafc;
+            border-left: 5px solid #38c6ec;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            margin: 12px 0;
+            border-bottom: none;
+            padding: 20px;
+        }
+
+        .arz-details {
+            display: none;
+            padding-top: 20px;
+            margin-top: 15px;
+            border-top: 1px dashed #cbd5e1;
+            animation: slideDown 0.3s ease-out forwards;
+        }
+
+        .arz-item.expanded .arz-details {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
         .stat-box {
             background: #f8fafc;
@@ -196,7 +414,6 @@
             text-align: center;
         }
 
-        /* Range Slider Özelleştirmesi */
         input[type=range] {
             width: 100%;
             height: 8px;
@@ -221,12 +438,27 @@
                 input[type=range]::-webkit-slider-thumb:hover {
                     transform: scale(1.15);
                 }
+
+        .result-box {
+            background-color: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .no-select {
+            user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+        }
     </style>
 </head>
 
 <body>
 
-    <!-- NAVBAR (Dashboard ile Birebir Aynı) -->
     <header class="navbar-custom">
         <a href="dashboard.html" class="navbar-brand-custom">
             <svg style="width:26px; height:26px;" viewBox="0 0 26 25" fill="none">
@@ -238,86 +470,135 @@
         <div class="nav-menu-links">
             <a href="dashboard.html" id="link-dashboard"><i class="bi bi-grid-1x2 me-1"></i> Portföyüm</a>
             <a href="halkaarz.html" id="link-halkaarz" class="active fw-semibold text-white"><i class="bi bi-rocket-takeoff me-1"></i> Halka Arz</a>
+            <a href="konsorsiyum.html" id="link-konsorsiyum"><i class="bi bi-bank me-1"></i> Konsorsiyum Liderleri</a>
             <a href="#" onclick="toggleChat(true); return false;" class="text-info fw-semibold"><i class="bi bi-robot me-1"></i> Portföy AI Asistan</a>
         </div>
 
         <div class="d-flex align-items-center gap-4">
-            <button class="btn btn-link text-white p-0 position-relative shadow-none" title="Canlı Bildirimler (Kule)">
-                <i class="bi bi-bell fs-5"></i>
-                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-dark rounded-circle">
-                    <span class="visually-hidden">Yeni bildirim</span>
-                </span>
-            </button>
-            <button class="btn-cikis-custom" onclick="cikisYap()">Çıkış Yap</button>
-        </div>
-    </header>
 
-    <!-- İKİ SÜTUNLU HALKA ARZ & SİMÜLASYON İSKELETİ -->
-    <main class="dashboard-wrapper">
-        <div class="row g-4">
-
-            <!-- SOL SÜTUN: GÜNCEL HALKA ARZ TAKVİMİ -->
-            <div class="col-lg-6">
-                <div class="custom-card">
-                    <h5 class="fw-bold m-0 text-dark mb-3">Güncel Halka Arz Takvimi</h5>
-                    <p class="text-muted small mb-4">İncelemek istediğiniz şirketin üzerine tıklayarak analitik verileri yükleyin.</p>
-
-                    <div class="d-flex flex-column gap-2" id="halkaarz-listesi">
-                        <!-- Statik Örnek Kart 1 -->
-                        <div class="arz-item" onclick="sirketSec('ENRGY', 18.20, 'Enerji', 2850000, 2025000, 50000000)">
+            <!-- BİLDİRİM KULESİ -->
+            <div class="notification-wrapper">
+                <button class="btn btn-link text-white p-0 position-relative shadow-none" title="Canlı Bildirimler" onclick="toggleBildirimler(event)">
+                    <i class="bi bi-bell fs-5"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-dark rounded-circle"></span>
+                </button>
+                <div class="notification-dropdown" id="bildirim-kutusu">
+                    <div class="notif-header">
+                        <span>Bildirim Merkezi</span>
+                        <i class="bi bi-check2-all text-primary" style="cursor:pointer;" title="Tümünü Okundu İşaretle"></i>
+                    </div>
+                    <div class="notif-body">
+                        <div class="notif-item">
+                            <i class="bi bi-info-circle-fill icon"></i>
                             <div>
-                                <div class="d-flex align-items-center gap-2 mb-1">
-                                    <span class="fw-bold fs-6">ENRGY</span>
-                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-0.5 rounded-pill" style="font-size:11px;">Yaklaşan</span>
-                                </div>
-                                <span class="text-muted small">Yeşil Enerji Üretim</span>
-                            </div>
-                            <div class="text-end">
-                                <div class="fw-bold text-primary">18,20 TL</div>
-                                <div class="text-muted" style="font-size: 11px;">09.10.2026 - 09.12.2026</div>
-                            </div>
-                        </div>
-
-                        <!-- Statik Örnek Kart 2 -->
-                        <div class="arz-item" onclick="sirketSec('TKNJI', 42.50, 'Teknoloji', 3150000, 2025000, 85000000)">
-                            <div>
-                                <div class="d-flex align-items-center gap-2 mb-1">
-                                    <span class="fw-bold fs-6">TKNJI</span>
-                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-0.5 rounded-pill" style="font-size:11px;">Talep Toplayan</span>
-                                </div>
-                                <span class="text-muted small">Teknoloji Gelecek A.Ş.</span>
-                            </div>
-                            <div class="text-end">
-                                <div class="fw-bold text-primary">42,50 TL</div>
-                                <div class="text-muted" style="font-size: 11px;">09.01.2026 - 09.03.2026</div>
-                            </div>
-                        </div>
-
-                        <!-- Statik Örnek Kart 3 -->
-                        <div class="arz-item" onclick="sirketSec('MCARD', 25.00, 'Finans', 1200000, 2025000, 25000000)">
-                            <div>
-                                <div class="d-flex align-items-center gap-2 mb-1">
-                                    <span class="fw-bold fs-6">MCARD</span>
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-0.5 rounded-pill" style="font-size:11px;">İşlem Gören</span>
-                                </div>
-                                <span class="text-muted small">Metropol Kurumsal Hizmetler</span>
-                            </div>
-                            <div class="text-end">
-                                <div class="fw-bold text-primary">25,00 TL</div>
-                                <div class="text-muted" style="font-size: 11px;">03.10.2026 - 03.12.2026</div>
+                                <div class="text">Şu an yeni veya okunmamış bir bildiriminiz bulunmuyor. Sistem güncel.</div>
+                                <span class="time">Şimdi</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- SAĞ SÜTUN: STRATEJİ SİMÜLATÖRÜ & SEKTÖREL ZEKA -->
-            <div class="col-lg-6">
-                <div class="custom-card">
-                    <h5 class="fw-bold m-0 text-dark mb-1">Strateji Simülatörü</h5>
-                    <p class="text-muted small mb-4">Kâr al / Ana para kurtarma hesaplayıcısı</p>
+            <!-- YENİ PROFİL AÇILIR MENÜSÜ -->
+            <div class="profile-wrapper">
+                <button class="btn p-0 border-0 shadow-none" onclick="toggleProfil(event)">
+                    <div class="bg-info bg-opacity-25 text-info rounded-circle d-flex align-items-center justify-content-center border border-info border-opacity-50" style="width: 36px; height: 36px; font-weight: 600; transition: all 0.2s;" title="Hesabım">
+                        TM
+                    </div>
+                </button>
+                <div class="profile-dropdown" id="profil-kutusu">
+                    <div class="profile-header">
+                        <div class="profile-avatar">TM</div>
+                        <div class="profile-info">
+                            <span class="profile-name">Tahsin Melikoğlu</span>
+                            <span class="profile-email">tahsin.melikoglu@tahsinportfoy.com</span>
+                        </div>
+                    </div>
+                    <div class="profile-menu">
+                        <a href="#"><i class="bi bi-person"></i> Profil Bilgileri</a>
+                        <a href="#"><i class="bi bi-gear"></i> Hesap Ayarları</a>
+                        <a href="#"><i class="bi bi-shield-check"></i> Güvenlik</a>
+                        <div class="border-top my-2 border-dashed" style="border-color: #f1f5f9;"></div>
+                        <a href="#" class="text-danger" onclick="cikisYap()"><i class="bi bi-box-arrow-right"></i> Çıkış Yap</a>
+                    </div>
+                </div>
+            </div>
 
-                    <!-- Sektörel Analiz Kutuları -->
+        </div>
+    </header>
+
+    <main class="dashboard-wrapper">
+        <div class="row g-4">
+
+            <div class="col-lg-5">
+                <div class="custom-card">
+                    <h5 class="fw-bold m-0 text-dark mb-3">Güncel Halka Arz Takvimi</h5>
+                    <p class="text-muted small mb-4">Künyesini ve simülasyonunu görmek için bir şirkete tıklayın.</p>
+
+                    <div class="d-flex flex-column" id="halkaarz-listesi">
+
+                        <div class="arz-item no-select" id="item-ENRGY" onclick="sirketSec('ENRGY', 18.20, 'Enerji', 2850000, 2025000, 50000000)">
+                            <div class="arz-summary">
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="fw-bold fs-6">ENRGY</span>
+                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-0.5 rounded-pill" style="font-size:11px;">Yaklaşan</span>
+                                    </div>
+                                    <span class="text-muted small">Yeşil Enerji Üretim</span>
+                                </div>
+                                <div class="text-end">
+                                    <div class="fw-bold text-primary">18,20 TL</div>
+                                    <div class="text-muted" style="font-size: 11px;">09.10 - 09.12.2026</div>
+                                </div>
+                            </div>
+                            <div class="arz-details" id="details-ENRGY"></div>
+                        </div>
+
+                        <div class="arz-item no-select" id="item-TKNJI" onclick="sirketSec('TKNJI', 42.50, 'Teknoloji', 3150000, 2025000, 85000000)">
+                            <div class="arz-summary">
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="fw-bold fs-6">TKNJI</span>
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-0.5 rounded-pill" style="font-size:11px;">Talep Toplayan</span>
+                                    </div>
+                                    <span class="text-muted small">Teknoloji Gelecek A.Ş.</span>
+                                </div>
+                                <div class="text-end">
+                                    <div class="fw-bold text-primary">42,50 TL</div>
+                                    <div class="text-muted" style="font-size: 11px;">09.01 - 09.03.2026</div>
+                                </div>
+                            </div>
+                            <div class="arz-details" id="details-TKNJI"></div>
+                        </div>
+
+                        <div class="arz-item no-select" id="item-MCARD" onclick="sirketSec('MCARD', 25.00, 'Finans', 1200000, 2025000, 25000000)">
+                            <div class="arz-summary">
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="fw-bold fs-6">MCARD</span>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-0.5 rounded-pill" style="font-size:11px;">İşlem Gören</span>
+                                    </div>
+                                    <span class="text-muted small">Metropol Kurumsal Hizmetler</span>
+                                </div>
+                                <div class="text-end">
+                                    <div class="fw-bold text-primary">25,00 TL</div>
+                                    <div class="text-muted" style="font-size: 11px;">03.10 - 03.12.2026</div>
+                                </div>
+                            </div>
+                            <div class="arz-details" id="details-MCARD"></div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="custom-card relative">
+                    <div class="mb-4">
+                        <h5 class="fw-bold m-0 text-dark mb-1">Strateji Simülatörü</h5>
+                        <p class="text-muted small m-0">Kâr al / Ana para kurtarma hesaplayıcısı</p>
+                    </div>
+
                     <div class="row g-3 mb-4">
                         <div class="col-6">
                             <div class="stat-box">
@@ -335,7 +616,6 @@
                         </div>
                     </div>
 
-                    <!-- İnteraktif Katılımcı Slider (Bar) Kutusu -->
                     <div class="p-3 bg-light border rounded-3 mb-4" id="slider-kutu" style="display: none;">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <span class="small fw-semibold text-muted">KATILIMCI SAYISI SİMÜLASYONU</span>
@@ -348,30 +628,44 @@
                         </div>
                     </div>
 
-                    <!-- Risk Profili Seçimi -->
-                    <label class="small fw-bold text-dark mb-2">Risk Profiliniz</label>
-                    <div class="row g-2 mb-4">
-                        <div class="col-4">
-                            <div class="p-2 border rounded text-center bg-white cursor-pointer" style="cursor:pointer;">
-                                <span class="d-fw-bold small fw-bold">Garantici</span>
-                                <span class="d-block text-muted" style="font-size:10px;">%50 Hedef</span>
+                    <label class="small fw-bold text-dark mb-2">Hedef Gerçekleştiğinde Ne Yapılacak?</label>
+                    <div class="row g-2 mb-4" id="strategy-buttons-container">
+                        <div class="col-6">
+                            <div class="strat-btn no-select active bg-dark text-white border-dark p-2 border rounded text-center cursor-pointer" data-strat="sifir">
+                                <span class="d-block small fw-bold">Sıfır Maliyet</span>
+                                <span class="d-block sub-text text-white-50" style="font-size:10px;">Ana parayı al, kalanı tut</span>
                             </div>
                         </div>
-                        <div class="col-4">
-                            <div class="p-2 border border-dark rounded text-center bg-dark text-white cursor-pointer" style="cursor:pointer;">
-                                <span class="d-block small fw-bold">Dengeli</span>
-                                <span class="d-block text-white-50" style="font-size:10px;">%100 Hedef</span>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="p-2 border rounded text-center bg-white cursor-pointer" style="cursor:pointer;">
-                                <span class="d-block small fw-bold">Agresif</span>
-                                <span class="d-block text-muted" style="font-size:10px;">%200 Hedef</span>
+                        <div class="col-6">
+                            <div class="strat-btn no-select bg-white text-dark p-2 border rounded text-center cursor-pointer" data-strat="kar-al">
+                                <span class="d-block small fw-bold">Tamamen Kâr Al</span>
+                                <span class="d-block sub-text text-muted" style="font-size:10px;">Tümünü sat ve nakde geç</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Input Satırı -->
+                    <label class="small fw-bold text-dark mb-2">Beklenen Hedef Marjı</label>
+                    <div class="row g-2 mb-4" id="risk-buttons-container">
+                        <div class="col-4">
+                            <div class="risk-btn no-select bg-white text-dark p-2 border rounded text-center cursor-pointer" data-hedef="25">
+                                <span class="d-block small fw-bold">Garantici</span>
+                                <span class="d-block sub-text text-muted" style="font-size:10px;">%25 Hedef</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="risk-btn no-select active bg-dark text-white border-dark p-2 border rounded text-center cursor-pointer" data-hedef="50">
+                                <span class="d-block small fw-bold">Dengeli</span>
+                                <span class="d-block sub-text text-white-50" style="font-size:10px;">%50 Hedef</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="risk-btn no-select bg-white text-dark p-2 border rounded text-center cursor-pointer" data-hedef="100">
+                                <span class="d-block small fw-bold">Agresif</span>
+                                <span class="d-block sub-text text-muted" style="font-size:10px;">%100 Hedef</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row g-3 mb-4">
                         <div class="col-6">
                             <label class="small fw-bold text-dark mb-1">Dağıtılan Lot</label>
@@ -383,18 +677,19 @@
                         </div>
                     </div>
 
-                    <button type="button" class="btn btn-dark w-100 py-3 fw-bold rounded-3 shadow-none" onclick="stratejiHesapla()">
-                        Stratejiyi Hesapla <i class="bi bi-calculator ms-1"></i>
+                    <button type="button" class="btn btn-dark w-100 py-3 fw-bold rounded-3 shadow-none d-flex align-items-center justify-content-center" onclick="stratejiHesapla()">
+                        Stratejiyi Hesapla <i class="bi bi-calculator ms-2"></i>
                     </button>
+
+                    <div id="simulasyon-sonuc" class="result-box"></div>
+
                 </div>
             </div>
 
         </div>
     </main>
 
-    <!-- BÜYÜTÜLMÜŞ AI CHAT PANEL (Dashboard ile Birebir Aynı Sağdan Kayan Drawer) -->
     <div id="ai-panel-overlay" onclick="toggleChat(false)"></div>
-
     <div id="ai-chat-panel">
         <div class="ai-header">
             <div class="d-flex align-items-center gap-3">
@@ -406,13 +701,11 @@
             </div>
             <button type="button" class="btn-close shadow-none fs-5" onclick="toggleChat(false)"></button>
         </div>
-
         <div class="ai-body" id="chat-body">
             <div class="ai-msg">
                 Merhaba Tahsin! Halka arz verilerini ve sektörel zeka analizlerini senin için inceledim, nasıl yardımcı olabilirim?
             </div>
         </div>
-
         <div class="ai-footer">
             <form id="chat-form" class="input-group ai-input-wrapper">
                 <input type="text" id="chat-input" class="form-control shadow-none border-end-0 bg-light" autocomplete="off" placeholder="Hangi arza kaç kişi katılır?" />
@@ -421,11 +714,109 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT MOTORU -->
+    <!-- JAVASCRIPT BÖLÜMÜ -->
     <script>
         let aktifToplamLot = 0;
+        let seciliHedef = 50;
+        let seciliStrateji = 'sifir';
 
-        // Şirket Seçilince Çalışacak Fonksiyon
+        const sirketKunyeleri = {
+            'ENRGY': {
+                ozet: "Yenilenebilir enerji sektöründe rüzgar ve güneş santralleri kurarak sürdürülebilir enerji sağlayan pazar lideri enerji firması.",
+                yontem: "Bireysele Eşit Dağıtım", buyukluk: "1.2 Milyar TL", aciklik: "%25 / %15 İskonto",
+                konsorsiyum: "Ziraat Yatırım",
+                katilim: "Uygun",
+                finansal: { ciro: "+%65", kar: "%22", borc: "Düşük (Kaldıraç %30)" },
+                fon: [{ alan: "Kapasite Artışı & GES Yatırımı", oran: 70, renk: "success" }, { alan: "İşletme Sermayesi", oran: 30, renk: "info" }],
+                taahhutler: ["1 Yıl Ortak Satışı Yok", "30 Gün Fiyat İstikrarı Planlanıyor"]
+            },
+            'TKNJI': {
+                ozet: "Savunma sanayi siber güvenlik ve yapay zeka entegre sistemler üreten AR-GE şirketi.",
+                yontem: "Tamamı Eşit Dağıtım", buyukluk: "3.5 Milyar TL", aciklik: "%18 / %20 İskonto",
+                konsorsiyum: "Garanti BBVA",
+                katilim: "Uygun",
+                finansal: { ciro: "+%110", kar: "%35", borc: "Sıfır Borç" },
+                fon: [{ alan: "AR-GE ve Yazılım Geliştirme", oran: 50, renk: "primary" }, { alan: "Yurtdışı Ofis", oran: 30, renk: "warning" }, { alan: "Borç Kapama", oran: 20, renk: "danger" }],
+                taahhutler: ["18 Ay Ortak Satışı Yok", "Fiyat İstikrarı Sağlanmayacak"]
+            },
+            'MCARD': {
+                ozet: "Kurumsal firmalara yemek kartı ve personel yan hakları çözümleri sunan FinTech şirketi.",
+                yontem: "Bireysele Eşit Dağıtım", buyukluk: "850 Milyon TL", aciklik: "%30 / %10 İskonto",
+                konsorsiyum: "İş Yatırım",
+                katilim: "Uygun Değil",
+                finansal: { ciro: "+%40", kar: "%12", borc: "Orta Seviye" },
+                fon: [{ alan: "İşletme Sermayesi", oran: 60, renk: "info" }, { alan: "Kısa Vadeli Borç Ödemesi", oran: 40, renk: "danger" }],
+                taahhutler: ["1 Yıl Ortak Satışı Yok", "15 Gün Fiyat İstikrarı"]
+            }
+        };
+
+        // YENİ: Profil Menüsünü Açma Kodu
+        function toggleProfil(event) {
+            event.stopPropagation();
+            const kutu = document.getElementById('profil-kutusu');
+
+            // Eğer bildirim kutusu açıksa onu kapat
+            document.getElementById('bildirim-kutusu').classList.remove('show');
+
+            kutu.classList.toggle('show');
+        }
+
+        // Bildirim Kutusu
+        function toggleBildirimler(event) {
+            event.stopPropagation();
+            const kutu = document.getElementById('bildirim-kutusu');
+
+            // Eğer profil kutusu açıksa onu kapat
+            document.getElementById('profil-kutusu').classList.remove('show');
+
+            kutu.classList.toggle('show');
+        }
+
+        // Sayfada boşluğa tıklayınca açık olan menüleri kapat
+        document.addEventListener('click', function (event) {
+            const notifWrapper = document.querySelector('.notification-wrapper');
+            const notifKutu = document.getElementById('bildirim-kutusu');
+            if (notifWrapper && !notifWrapper.contains(event.target)) {
+                notifKutu.classList.remove('show');
+            }
+
+            const profWrapper = document.querySelector('.profile-wrapper');
+            const profKutu = document.getElementById('profil-kutusu');
+            if (profWrapper && !profWrapper.contains(event.target)) {
+                profKutu.classList.remove('show');
+            }
+        });
+
+        document.querySelectorAll('.strat-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.strat-btn').forEach(b => {
+                    b.classList.remove('bg-dark', 'text-white', 'border-dark');
+                    b.classList.add('bg-white', 'text-dark');
+                    b.querySelector('.sub-text').classList.replace('text-white-50', 'text-muted');
+                });
+                this.classList.remove('bg-white', 'text-dark');
+                this.classList.add('bg-dark', 'text-white', 'border-dark');
+                this.querySelector('.sub-text').classList.replace('text-muted', 'text-white-50');
+                seciliStrateji = this.getAttribute('data-strat');
+                if (document.getElementById('simulasyon-sonuc').style.display === 'block') stratejiHesapla();
+            });
+        });
+
+        document.querySelectorAll('.risk-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.risk-btn').forEach(b => {
+                    b.classList.remove('bg-dark', 'text-white', 'border-dark');
+                    b.classList.add('bg-white', 'text-dark');
+                    b.querySelector('.sub-text').classList.replace('text-white-50', 'text-muted');
+                });
+                this.classList.remove('bg-white', 'text-dark');
+                this.classList.add('bg-dark', 'text-white', 'border-dark');
+                this.querySelector('.sub-text').classList.replace('text-muted', 'text-white-50');
+                seciliHedef = parseInt(this.getAttribute('data-hedef'));
+                if (document.getElementById('simulasyon-sonuc').style.display === 'block') stratejiHesapla();
+            });
+        });
+
         function sirketSec(sembol, fiyat, sektor, sektorOrt, genelOrt, toplamLot) {
             aktifToplamLot = toplamLot;
 
@@ -436,24 +827,111 @@
 
             const slider = document.getElementById('katilimci-slider');
             slider.value = sektorOrt;
-
             sliderGuncelle();
+
             document.getElementById('slider-kutu').style.display = "block";
+            document.getElementById('simulasyon-sonuc').style.display = "none";
+
+            document.querySelectorAll('.arz-item').forEach(item => {
+                item.classList.remove('expanded');
+                item.querySelector('.arz-details').innerHTML = '';
+            });
+
+            const clickedItem = document.getElementById('item-' + sembol);
+            clickedItem.classList.add('expanded');
+
+            const data = sirketKunyeleri[sembol];
+            if (data) {
+                let fonHtml = '';
+                data.fon.forEach(f => {
+                    fonHtml += `
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between mb-1" style="font-size:13px;">
+                                            <span class="text-dark fw-medium">${f.alan}</span>
+                                            <span class="text-muted fw-bold">%${f.oran}</span>
+                                        </div>
+                                        <div class="progress" style="height: 6px; border-radius: 3px;">
+                                            <div class="progress-bar bg-${f.renk}" style="width: ${f.oran}%"></div>
+                                        </div>
+                                    </div>`;
+                });
+
+                let taahhutHtml = '';
+                data.taahhutler.forEach(t => {
+                    taahhutHtml += `<li class="mb-2"><i class="bi bi-check2-circle text-success me-2 fs-6 align-middle"></i> ${t}</li>`;
+                });
+
+                const katilimBadge = data.katilim === 'Uygun'
+                    ? `<span class="badge bg-success-subtle text-success border border-success-subtle py-1"><i class="bi bi-check-circle me-1"></i> Uygun</span>`
+                    : `<span class="badge bg-danger-subtle text-danger border border-danger-subtle py-1"><i class="bi bi-x-circle me-1"></i> Uygun Değil</span>`;
+
+                const detayHtml = `
+                                <div class="pt-2">
+                                    <p class="text-secondary mb-4" style="font-size: 13px; line-height: 1.6;">${data.ozet}</p>
+
+                                    <div class="row g-3 mb-4 text-start">
+                                        <div class="col-6">
+                                            <span class="d-block text-muted mb-1" style="font-size:11px; text-transform: uppercase; letter-spacing: 0.5px;">Dağıtım Yöntemi</span>
+                                            <span class="fw-bold text-dark" style="font-size:13px;">${data.yontem}</span>
+                                        </div>
+                                        <div class="col-6">
+                                            <span class="d-block text-muted mb-1" style="font-size:11px; text-transform: uppercase; letter-spacing: 0.5px;">Arz Büyüklüğü</span>
+                                            <span class="fw-bold text-dark" style="font-size:13px;">${data.buyukluk}</span>
+                                        </div>
+                                        <div class="col-6 mt-3">
+                                            <span class="d-block text-muted mb-1" style="font-size:11px; text-transform: uppercase; letter-spacing: 0.5px;">Açıklık / İskonto</span>
+                                            <span class="fw-bold text-dark" style="font-size:13px;">${data.aciklik}</span>
+                                        </div>
+                                        <div class="col-6 mt-3">
+                                            <span class="d-block text-muted mb-1" style="font-size:11px; text-transform: uppercase; letter-spacing: 0.5px;">Katılım Endeksi</span>
+                                            ${katilimBadge}
+                                        </div>
+                                        <div class="col-12 mt-3">
+                                            <span class="d-block text-muted mb-1" style="font-size:11px; text-transform: uppercase; letter-spacing: 0.5px;">Konsorsiyum Lideri</span>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="fw-bold text-dark" style="font-size:13px;">${data.konsorsiyum}</span>
+                                                <a href="konsorsiyum.html?lider=${encodeURIComponent(data.konsorsiyum)}" class="badge bg-light text-primary border text-decoration-none shadow-sm" title="Kurum İstatistiklerini İncele"><i class="bi bi-box-arrow-up-right me-1"></i> Analiz</a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-white border rounded p-3 mb-4 shadow-sm">
+                                        <div class="d-flex justify-content-between text-center">
+                                            <div><span class="d-block text-muted mb-1" style="font-size:11px;">Ciro</span><strong class="text-dark fs-6">${data.finansal.ciro}</strong></div>
+                                            <div><span class="d-block text-muted mb-1" style="font-size:11px;">Kâr Marjı</span><strong class="text-success fs-6">${data.finansal.kar}</strong></div>
+                                            <div><span class="d-block text-muted mb-1" style="font-size:11px;">Borçluluk</span><strong class="text-dark fs-6">${data.finansal.borc}</strong></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <strong class="d-block text-dark mb-3 border-bottom pb-2" style="font-size:13px;">Fon Kullanım Yeri</strong>
+                                        ${fonHtml}
+                                    </div>
+
+                                    <div>
+                                        <strong class="d-block text-dark mb-3 border-bottom pb-2" style="font-size:13px;">Taahhütler</strong>
+                                        <ul class="list-unstyled text-secondary m-0" style="font-size: 13px; line-height: 1.6;">
+                                            ${taahhutHtml}
+                                        </ul>
+                                    </div>
+                                </div>
+                            `;
+
+                clickedItem.querySelector('.arz-details').innerHTML = detayHtml;
+            }
         }
 
-        // Slider her oynatıldığında anlık hesaplama yapan fonksiyon
         function sliderGuncelle() {
             const sliderDeger = parseInt(document.getElementById('katilimci-slider').value);
-
             document.getElementById('slider-deger-text').innerText = sliderDeger.toLocaleString('tr-TR') + " Kişi";
 
             let dusecekLot = Math.floor(aktifToplamLot / sliderDeger);
             document.getElementById('slider-sonuc-lot').innerText = dusecekLot + " Lot";
-
             document.getElementById('input-lot').value = dusecekLot;
+
+            if (document.getElementById('simulasyon-sonuc').style.display === 'block') stratejiHesapla();
         }
 
-        // Dashboard ile Aynı AI Asistan Çekmece Kontrolü
         function toggleChat(forceState) {
             const panel = document.getElementById('ai-chat-panel');
             const overlay = document.getElementById('ai-panel-overlay');
@@ -461,7 +939,6 @@
 
             panel.classList.toggle('active', shouldOpen);
             overlay.classList.toggle('active', shouldOpen);
-
             if (shouldOpen) setTimeout(() => document.getElementById('chat-input').focus(), 300);
         }
 
@@ -470,21 +947,105 @@
             window.location.href = 'login.html';
         }
 
-        // Strateji Hesapla Butonu
         async function stratejiHesapla() {
-            const lot = document.getElementById('input-lot').value;
-            const fiyat = document.getElementById('input-fiyat').value;
+            const lotInput = document.getElementById('input-lot').value;
+            const fiyatInput = document.getElementById('input-fiyat').value;
+
+            const lot = parseInt(lotInput);
+            const fiyat = parseFloat(fiyatInput.replace(',', '.'));
 
             if (!lot || !fiyat) {
                 alert("Lütfen önce dağıtılan lot sayısını ve arz fiyatını girin!");
                 return;
             }
 
-            console.log(`Hesaplanıyor... Lot: ${lot}, Fiyat: ${fiyat}`);
-            alert("Strateji simülasyonu başarılı! Backend entegrasyonu hazır.");
+            const btn = document.querySelector('button[onclick="stratejiHesapla()"]');
+            const orjinalMetin = btn.innerHTML;
+            btn.innerHTML = 'Hesaplanıyor... <span class="spinner-border spinner-border-sm ms-2" role="status"></span>';
+            btn.disabled = true;
+
+            try {
+                const yatirilanTutar = lot * fiyat;
+                const hedefSatisFiyati = fiyat * (1 + (seciliHedef / 100));
+                const sonucDiv = document.getElementById('simulasyon-sonuc');
+
+                if (seciliStrateji === 'sifir') {
+                    const kurtarmaOrani = yatirilanTutar / hedefSatisFiyati;
+                    const satilacakLot = Math.ceil(kurtarmaOrani);
+                    let kalanLot = lot - satilacakLot;
+                    if (kalanLot < 0) kalanLot = 0;
+
+                    sonucDiv.innerHTML = `
+                                    <div class="d-flex align-items-center gap-2 mb-3">
+                                        <i class="bi bi-shield-check fs-5 text-primary"></i>
+                                        <h6 class="fw-bold m-0 text-primary">Sıfır Maliyet Stratejisi (%${seciliHedef} Hedef)</h6>
+                                    </div>
+                                    <div class="mb-3 px-3 py-2 border border-info-subtle" style="background: rgba(255,255,255,0.7); border-radius: 8px; font-size: 13px;">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span class="text-muted">Toplam Yatırım:</span>
+                                            <span>${lot} Lot x ${fiyat.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL = <strong>${yatirilanTutar.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL</strong></span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span class="text-muted">Hedef Satış Fiyatı:</span>
+                                            <span>${fiyat.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL + %${seciliHedef} = <strong>${hedefSatisFiyati.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL</strong></span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span class="text-muted">Gereken Satış:</span>
+                                            <span>${yatirilanTutar.toLocaleString('tr-TR', { minimumFractionDigits: 0 })} / ${hedefSatisFiyati.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} = ${kurtarmaOrani.toFixed(2)} ➔ <strong>${satilacakLot} Lot</strong></span>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-info-subtle">
+                                        <span class="text-dark small fw-medium">Ana Parayı Kurtaracak Satış:</span>
+                                        <span class="fw-bold text-danger">${satilacakLot} Lot <i class="bi bi-arrow-down-right"></i></span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center pt-1">
+                                        <span class="text-dark small fw-bold">Bedava Kalan (Net Kâr):</span>
+                                        <span class="fw-bold text-success fs-5">${lot} - ${satilacakLot} = ${kalanLot} Lot <i class="bi bi-gift-fill ms-1"></i></span>
+                                    </div>
+                                `;
+                } else {
+                    const toplamSatis = lot * hedefSatisFiyati;
+                    const netKar = toplamSatis - yatirilanTutar;
+
+                    sonucDiv.innerHTML = `
+                                    <div class="d-flex align-items-center gap-2 mb-3">
+                                        <i class="bi bi-cash-coin fs-5 text-success"></i>
+                                        <h6 class="fw-bold m-0 text-success">Kâr Al ve Çık Stratejisi (%${seciliHedef} Hedef)</h6>
+                                    </div>
+                                    <div class="mb-3 px-3 py-2 border border-success-subtle" style="background: rgba(255,255,255,0.7); border-radius: 8px; font-size: 13px;">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span class="text-muted">Toplam Yatırım:</span>
+                                            <span>${lot} Lot x ${fiyat.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL = <strong>${yatirilanTutar.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL</strong></span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span class="text-muted">Hedef Satış Fiyatı:</span>
+                                            <span>${fiyat.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL + %${seciliHedef} = <strong>${hedefSatisFiyati.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL</strong></span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span class="text-muted">Beklenen Ciro:</span>
+                                            <span>${lot} Lot x ${hedefSatisFiyati.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL = <strong>${toplamSatis.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL</strong></span>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-success-subtle">
+                                        <span class="text-dark small fw-medium">Tüm Lotların Satışı:</span>
+                                        <span class="fw-bold text-primary">${toplamSatis.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL <i class="bi bi-arrow-up-right"></i></span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center pt-1">
+                                        <span class="text-dark small fw-bold">Nakit Net Kâr:</span>
+                                        <span class="fw-bold text-success fs-5">+${netKar.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL <i class="bi bi-wallet-fill ms-1"></i></span>
+                                    </div>
+                                `;
+                }
+                sonucDiv.style.display = 'block';
+            } catch (error) {
+                console.error('Hata:', error);
+                alert("Hesaplama sırasında bir hata oluştu.");
+            } finally {
+                btn.innerHTML = orjinalMetin;
+                btn.disabled = false;
+            }
         }
 
-        // AI Chat Gönderim Olayı
         document.getElementById('chat-form').addEventListener('submit', async function (e) {
             e.preventDefault();
             const input = document.getElementById('chat-input');
@@ -509,7 +1070,7 @@
                 loading.remove();
                 const aiMsg = document.createElement('div');
                 aiMsg.className = 'ai-msg';
-                aiMsg.textContent = "Halka arz verilerini inceledim. Sektör ortalamalarına göre bu strateji dengeli portföy profilinizle uyumlu görünmektedir.";
+                aiMsg.textContent = "Halka arz verilerini inceledim. Seçtiğiniz strateji risk profilinizle oldukça uyumlu görünüyor.";
                 chatBody.appendChild(aiMsg);
                 chatBody.scrollTop = chatBody.scrollHeight;
             }, 1000);

@@ -11,6 +11,13 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
+    <!-- AUTH GUARD (KAPI GÖREVLİSİ) -->
+    <script>
+        if (!localStorage.getItem('token')) {
+            window.location.replace('login.html');
+        }
+    </script>
+
     <style>
         body {
             background-color: #f4f7f6;
@@ -62,23 +69,6 @@
                 .nav-menu-links a:hover, .nav-menu-links a.active {
                     color: #38c6ec;
                 }
-
-        .btn-cikis-custom {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 8px 18px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-            .btn-cikis-custom:hover {
-                background: #dc2626;
-                border-color: #dc2626;
-            }
 
         .dashboard-wrapper {
             max-width: 1300px;
@@ -175,6 +165,200 @@
             background-color: transparent;
             border-bottom-color: #f1f5f9;
         }
+
+        /* --- BİLDİRİM AÇILIR MENÜSÜ (KULE) --- */
+        .notification-wrapper {
+            position: relative;
+        }
+
+        .notification-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 15px;
+            width: 320px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            display: none;
+            flex-direction: column;
+            z-index: 1001;
+            overflow: hidden;
+            transform-origin: top right;
+        }
+
+            .notification-dropdown.show {
+                display: flex;
+                animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .notif-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            font-weight: 700;
+            color: #1e293b;
+            background: #f8fafc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notif-body {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .notif-item {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            transition: background 0.2s;
+        }
+
+            .notif-item:hover {
+                background: #f8fafc;
+            }
+
+            .notif-item:last-child {
+                border-bottom: none;
+            }
+
+            .notif-item .icon {
+                font-size: 18px;
+                color: #0ea5e9;
+                margin-top: 2px;
+            }
+
+            .notif-item .text {
+                font-size: 13px;
+                color: #475569;
+                line-height: 1.5;
+            }
+
+            .notif-item .time {
+                font-size: 11px;
+                color: #94a3b8;
+                display: block;
+                margin-top: 4px;
+            }
+
+        /* --- YENİ PROFİL AÇILIR MENÜSÜ (DROPDOWN) --- */
+        .profile-wrapper {
+            position: relative;
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 15px;
+            width: 250px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            display: none;
+            flex-direction: column;
+            z-index: 1001;
+            overflow: hidden;
+            transform-origin: top right;
+        }
+
+            .profile-dropdown.show {
+                display: flex;
+                animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+        .profile-header {
+            padding: 20px;
+            border-bottom: 1px solid #f1f5f9;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .profile-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #38c6ec;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .profile-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1e293b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .profile-email {
+            font-size: 11px;
+            color: #64748b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .profile-menu {
+            padding: 10px 0;
+        }
+
+            .profile-menu a {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 10px 20px;
+                color: #475569;
+                text-decoration: none;
+                font-size: 13px;
+                font-weight: 500;
+                transition: background 0.2s, color 0.2s;
+            }
+
+                .profile-menu a:hover {
+                    background: #f8fafc;
+                    color: #0f172a;
+                }
+
+                .profile-menu a.text-danger:hover {
+                    background: #fef2f2;
+                    color: #dc2626;
+                }
+
+            .profile-menu i {
+                font-size: 16px;
+            }
     </style>
 </head>
 
@@ -188,26 +372,66 @@
             TahsinPortfoy
         </a>
 
-        <!-- SADELEŞMİŞ PREMIUM MENÜ -->
         <div class="nav-menu-links">
-            <a href="dashboard.html" id="link-dashboard"><i class="bi bi-grid-1x2 me-1"></i> Portföyüm</a>
+            <a href="dashboard.html" id="link-dashboard" class="active text-white fw-semibold"><i class="bi bi-grid-1x2 me-1"></i> Portföyüm</a>
             <a href="halkaarz.html" id="link-halkaarz"><i class="bi bi-rocket-takeoff me-1"></i> Halka Arz</a>
+            <a href="konsorsiyum.html" id="link-konsorsiyum"><i class="bi bi-bank me-1"></i> Konsorsiyum Liderleri</a>
             <a href="#" onclick="toggleChat(true); return false;" class="text-info fw-semibold"><i class="bi bi-robot me-1"></i> Portföy AI Asistan</a>
         </div>
 
         <div class="d-flex align-items-center gap-4">
-            <!-- YENİ KULE: BİLDİRİM ZİLİ -->
-            <button class="btn btn-link text-white p-0 position-relative shadow-none" title="Canlı Bildirimler (Kule)">
-                <i class="bi bi-bell fs-5"></i>
-                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-dark rounded-circle">
-                    <span class="visually-hidden">Yeni bildirim</span>
-                </span>
-            </button>
 
-            <button class="btn-cikis-custom" onclick="cikisYap()">Çıkış Yap</button>
+            <!-- BİLDİRİM KULESİ -->
+            <div class="notification-wrapper">
+                <button class="btn btn-link text-white p-0 position-relative shadow-none" title="Canlı Bildirimler" onclick="toggleBildirimler(event)">
+                    <i class="bi bi-bell fs-5"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-dark rounded-circle"></span>
+                </button>
+                <div class="notification-dropdown" id="bildirim-kutusu">
+                    <div class="notif-header">
+                        <span>Bildirim Merkezi</span>
+                        <i class="bi bi-check2-all text-primary" style="cursor:pointer;" title="Tümünü Okundu İşaretle"></i>
+                    </div>
+                    <div class="notif-body">
+                        <div class="notif-item">
+                            <i class="bi bi-info-circle-fill icon"></i>
+                            <div>
+                                <div class="text">Şu an yeni veya okunmamış bir bildiriminiz bulunmuyor. Sistem güncel.</div>
+                                <span class="time">Şimdi</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- YENİ PROFİL AÇILIR MENÜSÜ -->
+            <div class="profile-wrapper">
+                <button class="btn p-0 border-0 shadow-none" onclick="toggleProfil(event)">
+                    <div class="bg-info bg-opacity-25 text-info rounded-circle d-flex align-items-center justify-content-center border border-info border-opacity-50" style="width: 36px; height: 36px; font-weight: 600; transition: all 0.2s;" title="Hesabım">
+                        TM
+                    </div>
+                </button>
+                <div class="profile-dropdown" id="profil-kutusu">
+                    <div class="profile-header">
+                        <div class="profile-avatar">TM</div>
+                        <div class="profile-info">
+                            <span class="profile-name">Tahsin Melikoğlu</span>
+                            <span class="profile-email">tahsin.melikoglu@tahsinportfoy.com</span>
+                        </div>
+                    </div>
+                    <div class="profile-menu">
+                        <a href="#"><i class="bi bi-person"></i> Profil Bilgileri</a>
+                        <a href="#"><i class="bi bi-gear"></i> Hesap Ayarları</a>
+                        <a href="#"><i class="bi bi-shield-check"></i> Güvenlik</a>
+                        <div class="border-top my-2 border-dashed" style="border-color: #f1f5f9;"></div>
+                        <a href="#" class="text-danger" onclick="cikisYap()"><i class="bi bi-box-arrow-right"></i> Çıkış Yap</a>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </header>
-    
+
     <main class="dashboard-wrapper">
         <div class="row g-4 mb-4">
             <div class="col-lg-7">
@@ -315,7 +539,49 @@
         </div>
     </div>
 
+    <!-- BOOTSTRAP JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
+        // YENİ: Profil Menüsünü Açma Kodu
+        function toggleProfil(event) {
+            event.stopPropagation();
+            const kutu = document.getElementById('profil-kutusu');
+
+            // Eğer bildirim kutusu açıksa onu kapat
+            const bildirim = document.getElementById('bildirim-kutusu');
+            if (bildirim) bildirim.classList.remove('show');
+
+            kutu.classList.toggle('show');
+        }
+
+        // Bildirim Kutusu Kontrolü
+        function toggleBildirimler(event) {
+            event.stopPropagation();
+            const kutu = document.getElementById('bildirim-kutusu');
+
+            // Eğer profil kutusu açıksa onu kapat
+            const profil = document.getElementById('profil-kutusu');
+            if (profil) profil.classList.remove('show');
+
+            kutu.classList.toggle('show');
+        }
+
+        // Sayfada boşluğa tıklayınca açık olan menüleri kapat
+        document.addEventListener('click', function (event) {
+            const notifWrapper = document.querySelector('.notification-wrapper');
+            const notifKutu = document.getElementById('bildirim-kutusu');
+            if (notifWrapper && !notifWrapper.contains(event.target)) {
+                if (notifKutu) notifKutu.classList.remove('show');
+            }
+
+            const profWrapper = document.querySelector('.profile-wrapper');
+            const profKutu = document.getElementById('profil-kutusu');
+            if (profWrapper && !profWrapper.contains(event.target)) {
+                if (profKutu) profKutu.classList.remove('show');
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', function () {
             varliklariGetir();
         });
@@ -339,12 +605,12 @@
 
                     if (varliklar.length === 0) {
                         tbody.innerHTML = `
-                                <tr>
-                                    <td colspan="7" class="text-center text-muted py-5">
-                                        <i class="bi bi-inbox fs-3 d-block mb-2 text-secondary"></i>
-                                        Bu hesaba ait portföyde henüz varlık bulunmuyor.
-                                    </td>
-                                </tr>`;
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-5">
+                                                <i class="bi bi-inbox fs-3 d-block mb-2 text-secondary"></i>
+                                                Bu hesaba ait portföyde henüz varlık bulunmuyor.
+                                            </td>
+                                        </tr>`;
                         return;
                     }
 
@@ -355,9 +621,6 @@
                         const tur = v.varlikTuru || v.VarlikTuru || '';
                         const miktar = v.miktar || v.Miktar || 0;
                         const alisFiyati = v.alisFiyati || v.AlisFiyati || 0;
-
-                        // Şimdilik güncel fiyat API'den dönene kadar alisFiyati bazlı simüle edebiliriz
-                        // ya da backend'den geliyorsa doğrudan v.guncelFiyat okuyabiliriz:
                         const guncelFiyat = v.guncelFiyat || v.GuncelFiyat || alisFiyati;
 
                         const toplamMaliyet = alisFiyati * miktar;
@@ -372,18 +635,18 @@
 
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
-                                <td class="fw-bold">${sembol}</td>
-                                <td><span class="badge bg-light text-dark border">${tur}</span></td>
-                                <td>${miktar.toLocaleString()}</td>
-                                <td>${alisFiyati.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL</td>
-                                <td class="fw-semibold">${guncelFiyat.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL</td>
-                                <td class="fw-bold">${toplamDeger.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL</td>
-                                <td>
-                                    <span class="badge ${badgeClass} px-2.5 py-1.5 rounded-pill fw-semibold">
-                                        ${karZararIcon}${karZarar.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL (${karZararIcon}${karZararYuzde.toFixed(1)}%)
-                                    </span>
-                                </td>
-                            `;
+                                        <td class="fw-bold">${sembol}</td>
+                                        <td><span class="badge bg-light text-dark border">${tur}</span></td>
+                                        <td>${miktar.toLocaleString()}</td>
+                                        <td>${alisFiyati.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL</td>
+                                        <td class="fw-semibold">${guncelFiyat.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL</td>
+                                        <td class="fw-bold">${toplamDeger.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL</td>
+                                        <td>
+                                            <span class="badge ${badgeClass} px-2.5 py-1.5 rounded-pill fw-semibold">
+                                                ${karZararIcon}${karZarar.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL (${karZararIcon}${karZararYuzde.toFixed(1)}%)
+                                            </span>
+                                        </td>
+                                    `;
                         tbody.appendChild(tr);
                     });
 
