@@ -1,0 +1,644 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Yönetim Paneli — TahsinPortfoy</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- AUTH GUARD -->
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.replace('login.html');
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            color: #1e293b;
+            margin: 0;
+            padding-top: 90px;
+        }
+
+        .navbar-custom {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 72px;
+            background: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .navbar-brand-custom {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #fff;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .nav-menu-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+            .nav-menu-links a {
+                color: #94a3b8;
+                text-decoration: none;
+                font-size: 14px;
+                font-weight: 500;
+                transition: color 0.2s;
+            }
+
+                .nav-menu-links a:hover, .nav-menu-links a.active {
+                    color: #38c6ec;
+                }
+
+        .dashboard-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px 30px;
+        }
+
+        .custom-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control, .form-select {
+            font-size: 14px;
+            border-color: #cbd5e1;
+            box-shadow: none !important;
+        }
+
+            .form-control:focus, .form-select:focus {
+                border-color: #38c6ec;
+            }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f172a;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .dynamic-row {
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+        }
+
+            .remove-btn:hover {
+                color: #dc2626;
+            }
+
+        .list-group-item-custom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: #fff;
+            transition: background 0.2s;
+        }
+
+            .list-group-item-custom:hover {
+                background: #f8fafc;
+            }
+
+        .row.g-4 {
+            align-items: flex-start !important;
+        }
+
+        .sticky-panel {
+            position: sticky;
+            top: 95px;
+            max-height: calc(100vh - 115px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+
+            .sticky-panel::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .sticky-panel::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 3px;
+            }
+    </style>
+</head>
+
+<body>
+
+    <header class="navbar-custom">
+        <a href="dashboard.html" class="navbar-brand-custom">
+            <svg style="width:26px; height:26px;" viewBox="0 0 26 25" fill="none">
+                <path d="M9.45 24.95 L7.07 24.09 L5.56 23.30 L3.33 21.03 L2.31 19.44 L0.74 16.05 L0.27 13.91 L0.29 11.25 L0.80 8.75 L1.95 6.20 L3.26 4.50 L5.15 2.67 L7.77 1.02 L9.91 0.18 L12.16 -0.20 L15.22 -0.16 L17.61 0.35 L19.30 1.06 L20.88 2.06 L22.23 3.37 L24.01 5.48 L24.76 6.58 L25.70 8.63 L26.00 10.35 L26.02 11.35 L25.54 12.12 L24.96 12.32 L22.35 12.36 L21.46 12.18 L20.78 11.85 L20.32 11.37 L19.45 9.56 L17.88 7.58 L16.59 6.60 L14.59 5.84 L13.24 5.69 L11.54 5.93 L10.47 6.44 L9.12 7.35 L7.92 8.50 L6.70 10.55 L6.26 12.65 L6.41 14.36 L7.14 15.86 L8.63 17.79 L12.57 20.70 L12.96 21.60 L13.13 22.82 L12.93 24.36 L12.65 24.86 L12.03 25.35 L11.27 25.42 L9.45 24.95 Z" fill="#38c6ec" />
+            </svg>
+            TahsinPortfoy <span class="badge bg-danger ms-2" style="font-size: 10px;">ADMIN</span>
+        </a>
+        <div class="nav-menu-links">
+            <a href="dashboard.html"><i class="bi bi-grid-1x2 me-1"></i> Portföyüm</a>
+            <a href="halkaarz.html"><i class="bi bi-rocket-takeoff me-1"></i> Halka Arz</a>
+            <a href="admin.html" class="active fw-semibold text-white"><i class="bi bi-shield-lock me-1"></i> Yönetim Paneli</a>
+        </div>
+        <div>
+            <button class="btn btn-outline-light btn-sm" onclick="cikisYap()">Çıkış Yap</button>
+        </div>
+    </header>
+
+    <main class="dashboard-wrapper">
+        <div class="row g-4">
+
+            <!-- SOL PANEL: VERİ GİRİŞ VE GÜNCELLEME FORMU -->
+            <div class="col-lg-8">
+                <form id="halkaarz-form" onsubmit="kaydet(event)">
+
+                    <div class="custom-card">
+                        <div class="section-title"><i class="bi bi-building me-2 text-primary"></i> Temel Şirket Bilgileri</div>
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label">Şirket Adı</label>
+                                <input type="text" class="form-control" id="f_sirketAdi" required placeholder="Örn: Tahsin Yapay Zeka Sistemleri A.Ş.">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Borsa Kodu</label>
+                                <input type="text" class="form-control" id="f_borsaKodu" required placeholder="Örn: THSNZ" style="text-transform: uppercase;">
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label">Şirket Özeti</label>
+                                <textarea class="form-control" id="f_sirketOzeti" rows="2" placeholder="Şirket ne iş yapar?"></textarea>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Sektör</label>
+                                <select class="form-select" id="f_sektor">
+                                    <option value="Teknoloji / Bilişim">Teknoloji / Bilişim</option>
+                                    <option value="Enerji">Enerji</option>
+                                    <option value="Finans">Finans</option>
+                                    <option value="Gıda">Gıda</option>
+                                    <option value="Gayrimenkul">Gayrimenkul</option>
+                                    <option value="Sanayi / Üretim">Sanayi / Üretim</option>
+                                    <option value="Sağlık">Sağlık</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Statü</label>
+                                <select class="form-select" id="f_statu">
+                                    <option value="Yaklaşan">Yaklaşan</option>
+                                    <option value="Talep Toplayan">Talep Toplayan</option>
+                                    <option value="İşlem Gören">İşlem Gören</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Konsorsiyum Lideri</label>
+                                <input type="text" class="form-control" id="f_konsorsiyumLideri" placeholder="Örn: Ziraat Yatırım">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="custom-card">
+                        <div class="section-title"><i class="bi bi-graph-up-arrow me-2 text-success"></i> Arz ve Finansal Detaylar</div>
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">Lot Fiyatı (TL)</label>
+                                <input type="number" class="form-control" id="f_lotFiyati" step="0.01" required placeholder="0.00">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Toplam Lot</label>
+                                <input type="number" class="form-control" id="f_toplamLot" required placeholder="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Arz Büyüklüğü (TL)</label>
+                                <input type="number" class="form-control" id="f_arzBuyuklugu" placeholder="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Talep Toplama Başlangıç</label>
+                                <input type="datetime-local" class="form-control" id="f_baslangic" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Talep Toplama Bitiş</label>
+                                <input type="datetime-local" class="form-control" id="f_bitis" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Açıklık Oranı (%)</label>
+                                <input type="number" class="form-control" id="f_aciklik" step="0.01" placeholder="20.00">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">İskonto Oranı (%)</label>
+                                <input type="number" class="form-control" id="f_iskonto" step="0.01" placeholder="15.00">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Dağıtım Yöntemi</label>
+                                <select class="form-select" id="f_dagitimYontemi">
+                                    <option value="Bireysele Eşit Dağıtım">Bireysele Eşit Dağıtım</option>
+                                    <option value="Tamamı Eşit Dağıtım">Tamamı Eşit Dağıtım</option>
+                                    <option value="Oransal Dağıtım">Oransal Dağıtım</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Ciro Artışı</label>
+                                <input type="text" class="form-control" id="f_ciro" placeholder="Örn: +%120">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Kâr Marjı</label>
+                                <input type="text" class="form-control" id="f_karMarji" placeholder="Örn: %35">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Borçluluk Durumu</label>
+                                <input type="text" class="form-control" id="f_borcluluk" placeholder="Örn: Sıfır Borç">
+                            </div>
+                            <div class="col-md-6 mt-4">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="f_katilimEndeksi" checked>
+                                    <label class="form-check-label fw-bold" for="f_katilimEndeksi">Katılım Endeksine Uygun</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-primary">Gerçekleşen Katılımcı Sayısı</label>
+                                <input type="number" class="form-control border-primary" id="f_gerceklesen" placeholder="Boş bırakılabilir">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="custom-card">
+                        <div class="section-title"><i class="bi bi-pie-chart me-2 text-warning"></i> Fon Kullanım Yerleri</div>
+                        <div id="fon-container"></div>
+                        <button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="addFonRow()"><i class="bi bi-plus-circle"></i> Yeni Fon Alanı Ekle</button>
+
+                        <div class="section-title mt-5"><i class="bi bi-shield-check me-2 text-info"></i> Taahhütler</div>
+                        <div id="taahhut-container"></div>
+                        <button type="button" class="btn btn-sm btn-outline-info fw-bold" onclick="addTaahhutRow()"><i class="bi bi-plus-circle"></i> Yeni Taahhüt Ekle</button>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-dark w-100 py-3 fs-5 fw-bold rounded-3" id="btn-kaydet">
+                            Sisteme Kaydet <i class="bi bi-send ms-2"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary py-3 px-4 fw-bold rounded-3 d-none" id="btn-iptal" onclick="iptalEt()">
+                            İptal
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+
+            <!-- SAĞ PANEL: MEVCUT ARZLAR (STICKY) -->
+            <div class="col-lg-4">
+                <div class="custom-card sticky-panel">
+                    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                        <h6 class="fw-bold m-0 text-dark">Sistemdeki Kayıtlar</h6>
+                        <button class="btn btn-sm btn-light border" onclick="listeyiYenile()"><i class="bi bi-arrow-clockwise"></i></button>
+                    </div>
+
+                    <div id="aktif-arzlar-listesi">
+                        <div class="text-center text-muted py-3">Yükleniyor...</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        const API_URL = '/api/HalkaArzlar';
+        let apiHalkaArzlar = [];
+        let guncellenecekId = null; // Update modu için referans tutucu
+
+        document.addEventListener('DOMContentLoaded', () => {
+            addFonRow();
+            addTaahhutRow();
+            listeyiYenile();
+        });
+
+        // ==========================================
+        // 1. DİNAMİK ALAN YÖNETİMİ
+        // ==========================================
+        function addFonRow(alan = '', oran = '', renk = 'primary') {
+            const container = document.getElementById('fon-container');
+            const row = document.createElement('div');
+            row.className = 'row g-2 dynamic-row fon-row';
+            row.innerHTML = `
+                    <i class="bi bi-x-circle-fill remove-btn" onclick="this.parentElement.remove()"></i>
+                    <div class="col-md-6">
+                        <label class="form-label" style="font-size:10px;">Alan Adı</label>
+                        <input type="text" class="form-control form-control-sm fon-alan" placeholder="Örn: AR-GE Yatırımları" value="${alan}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" style="font-size:10px;">Oran (%)</label>
+                        <input type="number" class="form-control form-control-sm fon-oran" placeholder="40" value="${oran}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" style="font-size:10px;">Renk</label>
+                        <select class="form-select form-select-sm fon-renk">
+                            <option value="primary" ${renk === 'primary' ? 'selected' : ''}>Mavi</option>
+                            <option value="info" ${renk === 'info' ? 'selected' : ''}>Açık Mavi</option>
+                            <option value="success" ${renk === 'success' ? 'selected' : ''}>Yeşil</option>
+                            <option value="warning" ${renk === 'warning' ? 'selected' : ''}>Sarı</option>
+                            <option value="danger" ${renk === 'danger' ? 'selected' : ''}>Kırmızı</option>
+                            <option value="dark" ${renk === 'dark' ? 'selected' : ''}>Siyah</option>
+                        </select>
+                    </div>
+                `;
+            container.appendChild(row);
+        }
+
+        function addTaahhutRow(metin = '') {
+            const container = document.getElementById('taahhut-container');
+            const row = document.createElement('div');
+            row.className = 'dynamic-row taahhut-row p-2 pe-5';
+            row.innerHTML = `
+                    <i class="bi bi-x-circle-fill remove-btn" style="top:12px;" onclick="this.parentElement.remove()"></i>
+                    <input type="text" class="form-control form-control-sm taahhut-text" placeholder="Örn: 1 Yıl Ortak Satışı Yok" value="${metin}" required>
+                `;
+            container.appendChild(row);
+        }
+
+        // ==========================================
+        // 2. LİSTELEME VE SİLME İŞLEMLERİ
+        // ==========================================
+        async function listeyiYenile() {
+            const listeKutusu = document.getElementById('aktif-arzlar-listesi');
+            listeKutusu.innerHTML = '<div class="text-center text-muted py-3"><div class="spinner-border spinner-border-sm"></div></div>';
+
+            try {
+                const response = await fetch(API_URL, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+
+                if (response.ok) {
+                    apiHalkaArzlar = await response.json();
+                    listeKutusu.innerHTML = '';
+
+                    if (apiHalkaArzlar.length === 0) {
+                        listeKutusu.innerHTML = '<div class="text-center text-muted small py-3">Sistemde kayıtlı arz bulunmuyor.</div>';
+                        return;
+                    }
+
+                    apiHalkaArzlar.forEach(arz => {
+                        let badgeClass = "bg-primary";
+                        if (arz.statu === "Yaklaşan") badgeClass = "bg-warning text-dark";
+                        else if (arz.statu === "İşlem Gören") badgeClass = "bg-success";
+
+                        const html = `
+                                <div class="list-group-item-custom">
+                                    <div>
+                                        <div class="d-flex align-items-center gap-2 mb-1">
+                                            <span class="fw-bold text-dark">${arz.borsaKodu}</span>
+                                            <span class="badge ${badgeClass}" style="font-size:9px;">${arz.statu}</span>
+                                        </div>
+                                        <div class="text-muted" style="font-size:11px;">${arz.sirketAdi}</div>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-sm btn-outline-primary border-0 me-1" onclick="kayitDuzenle('${arz.borsaKodu}')" title="Düzenle">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger border-0" onclick="kayitSil(${arz.id}, '${arz.borsaKodu}')" title="Sil">
+                                            <i class="bi bi-trash3-fill"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        listeKutusu.insertAdjacentHTML('beforeend', html);
+                    });
+                }
+            } catch (error) {
+                listeKutusu.innerHTML = '<div class="text-center text-danger small py-3">Veriler çekilemedi.</div>';
+            }
+        }
+
+        async function kayitSil(id, borsaKodu) {
+            if (!confirm(`${borsaKodu} kodlu halka arzı tamamen silmek istediğinize emin misiniz?`)) return;
+
+            try {
+                const response = await fetch(`${API_URL}/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+
+                if (response.ok) {
+                    listeyiYenile();
+                } else {
+                    alert('Silme işlemi başarısız oldu.');
+                }
+            } catch (error) {
+                alert('Sunucu hatası.');
+            }
+        }
+
+        // ==========================================
+        // 3. GÜNCELLEME İÇİN FORMU DOLDURMA
+        // ==========================================
+        function formatTarihForInput(tarihStr) {
+            if (!tarihStr) return "";
+            // API'den "dd.MM.yyyy" dönüyorsa input type="datetime-local" için "YYYY-MM-DDThh:mm" formatına çeviriyoruz.
+            const parts = tarihStr.split(".");
+            if (parts.length === 3) {
+                return `${parts[2]}-${parts[1]}-${parts[0]}T09:00`;
+            }
+            return tarihStr; // Zaten ISO formatındaysa direkt döner
+        }
+
+        function kayitDuzenle(borsaKodu) {
+            const data = apiHalkaArzlar.find(x => x.borsaKodu === borsaKodu);
+            if (!data) return;
+
+            guncellenecekId = data.id; // Update Moduna Geçtik!
+
+            document.getElementById('f_sirketAdi').value = data.sirketAdi || '';
+            document.getElementById('f_borsaKodu').value = data.borsaKodu || '';
+            document.getElementById('f_sirketOzeti').value = data.sirketOzeti || '';
+            document.getElementById('f_sektor').value = data.sektor || 'Teknoloji / Bilişim';
+            document.getElementById('f_statu').value = data.statu || 'Yaklaşan';
+            document.getElementById('f_konsorsiyumLideri').value = data.konsorsiyumLideri || '';
+            document.getElementById('f_lotFiyati').value = data.lotFiyati || '';
+            document.getElementById('f_toplamLot').value = data.toplamDagilacakLot || '';
+            document.getElementById('f_arzBuyuklugu').value = data.arzBuyukluguTL || '';
+
+            document.getElementById('f_baslangic').value = formatTarihForInput(data.talepToplamaBaslangic);
+            document.getElementById('f_bitis').value = formatTarihForInput(data.talepToplamaBitis);
+
+            document.getElementById('f_aciklik').value = data.halkaAciklikOrani || '';
+            document.getElementById('f_iskonto').value = data.iskontoOrani || '';
+            document.getElementById('f_dagitimYontemi').value = data.dagitimYontemi || 'Bireysele Eşit Dağıtım';
+            document.getElementById('f_ciro').value = data.finansalCiroArtisi || '';
+            document.getElementById('f_karMarji').value = data.finansalKarMarji || '';
+            document.getElementById('f_borcluluk').value = data.finansalBorcluluk || '';
+            document.getElementById('f_katilimEndeksi').checked = data.katilimEndeksineUygunMu;
+            document.getElementById('f_gerceklesen').value = data.gerceklesenKatilimciSayisi || '';
+
+            // Dinamik Listeleri Temizle ve Doldur
+            document.getElementById('fon-container').innerHTML = '';
+            if (data.fonKullanimYerleri && data.fonKullanimYerleri.length > 0) {
+                data.fonKullanimYerleri.forEach(f => addFonRow(f.alan || f.Alan, f.oran || f.Oran, f.renk || f.Renk));
+            } else {
+                addFonRow();
+            }
+
+            document.getElementById('taahhut-container').innerHTML = '';
+            if (data.taahhutler && data.taahhutler.length > 0) {
+                data.taahhutler.forEach(t => addTaahhutRow(t));
+            } else {
+                addTaahhutRow();
+            }
+
+            // Buton Görünümünü Değiştir
+            const btn = document.getElementById('btn-kaydet');
+            btn.innerHTML = 'Değişiklikleri Güncelle <i class="bi bi-arrow-repeat ms-2"></i>';
+            btn.classList.replace('btn-dark', 'btn-primary');
+            document.getElementById('btn-iptal').classList.remove('d-none');
+
+            // Kullanıcıyı formun en üstüne kaydır
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function iptalEt() {
+            guncellenecekId = null;
+            document.getElementById('halkaarz-form').reset();
+            document.getElementById('fon-container').innerHTML = '';
+            document.getElementById('taahhut-container').innerHTML = '';
+            addFonRow();
+            addTaahhutRow();
+
+            const btn = document.getElementById('btn-kaydet');
+            btn.innerHTML = 'Sisteme Kaydet <i class="bi bi-send ms-2"></i>';
+            btn.classList.replace('btn-primary', 'btn-dark');
+            document.getElementById('btn-iptal').classList.add('d-none');
+        }
+
+        // ==========================================
+        // 4. FORMU JSON'A ÇEVİRİP API'YE GÖNDERME (POST VEYA PUT)
+        // ==========================================
+        async function kaydet(event) {
+            event.preventDefault();
+            const btn = document.getElementById('btn-kaydet');
+            const orijinalIcerik = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> İşleniyor...';
+            btn.disabled = true;
+
+            const fonListesi = [];
+            document.querySelectorAll('.fon-row').forEach(row => {
+                fonListesi.push({
+                    Alan: row.querySelector('.fon-alan').value,
+                    Oran: parseInt(row.querySelector('.fon-oran').value),
+                    Renk: row.querySelector('.fon-renk').value
+                });
+            });
+
+            const taahhutListesi = [];
+            document.querySelectorAll('.taahhut-row').forEach(row => {
+                taahhutListesi.push(row.querySelector('.taahhut-text').value);
+            });
+
+            const payload = {
+                SirketAdi: document.getElementById('f_sirketAdi').value,
+                BorsaKodu: document.getElementById('f_borsaKodu').value.toUpperCase(),
+                LotFiyati: parseFloat(document.getElementById('f_lotFiyati').value),
+                ToplamDagilacakLot: parseInt(document.getElementById('f_toplamLot').value),
+                Statu: document.getElementById('f_statu').value,
+                TalepToplamaBaslangic: document.getElementById('f_baslangic').value,
+                TalepToplamaBitis: document.getElementById('f_bitis').value,
+                Sektor: document.getElementById('f_sektor').value,
+                KonsorsiyumLideri: document.getElementById('f_konsorsiyumLideri').value,
+                SirketOzeti: document.getElementById('f_sirketOzeti').value,
+                DagitimYontemi: document.getElementById('f_dagitimYontemi').value,
+                ArzBuyukluguTL: document.getElementById('f_arzBuyuklugu').value ? parseFloat(document.getElementById('f_arzBuyuklugu').value) : null,
+                HalkaAciklikOrani: document.getElementById('f_aciklik').value ? parseFloat(document.getElementById('f_aciklik').value) : null,
+                IskontoOrani: document.getElementById('f_iskonto').value ? parseFloat(document.getElementById('f_iskonto').value) : null,
+                FinansalCiroArtisi: document.getElementById('f_ciro').value,
+                FinansalKarMarji: document.getElementById('f_karMarji').value,
+                FinansalBorcluluk: document.getElementById('f_borcluluk').value,
+                KatilimEndeksineUygunMu: document.getElementById('f_katilimEndeksi').checked,
+                GerceklesenKatilimciSayisi: document.getElementById('f_gerceklesen').value ? parseInt(document.getElementById('f_gerceklesen').value) : null,
+                FonKullanimYerleri: fonListesi,
+                Taahhutler: taahhutListesi
+            };
+
+            // Eğer Update modundaysak Id'yi de payload'a ekle ve PUT at. Değilse POST at.
+            let methodTuru = 'POST';
+            let gonderilecekUrl = API_URL;
+
+            if (guncellenecekId !== null) {
+                payload.Id = guncellenecekId;
+                methodTuru = 'PUT';
+                gonderilecekUrl = `${API_URL}/${guncellenecekId}`;
+            }
+
+            try {
+                const response = await fetch(gonderilecekUrl, {
+                    method: methodTuru,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    alert(guncellenecekId !== null ? 'Halka arz başarıyla güncellendi!' : 'Halka arz başarıyla eklendi!');
+                    iptalEt(); // Formu ve butonları sıfırla
+                    listeyiYenile(); // Listeyi güncelle
+                } else {
+                    const err = await response.json();
+                    alert('Hata oluştu: ' + (err.title || err.Message || 'Bilinmeyen Hata'));
+                }
+            } catch (error) {
+                alert('Sunucuya bağlanılamadı.');
+            } finally {
+                btn.innerHTML = guncellenecekId !== null ? 'Değişiklikleri Güncelle <i class="bi bi-arrow-repeat ms-2"></i>' : 'Sisteme Kaydet <i class="bi bi-send ms-2"></i>';
+                btn.disabled = false;
+            }
+        }
+
+        function cikisYap() {
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>
