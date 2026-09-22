@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using PortfoyTakipAPI.Models;
 
 namespace PortfoyTakipAPI.CQRS.Commands
@@ -21,7 +23,10 @@ namespace PortfoyTakipAPI.CQRS.Commands
         public int ToplamDagilacakLot { get; set; }
 
         public string? Sektor { get; set; }
-        public string? KonsorsiyumLideri { get; set; }
+
+        // YENİ EKLENDİ: Banka/Aracı Kurum ID'lerini alacak liste
+        public List<int>? KonsorsiyumIds { get; set; }
+
         public bool KatilimEndeksineUygunMu { get; set; }
         public int? GerceklesenKatilimciSayisi { get; set; }
 
@@ -51,10 +56,11 @@ namespace PortfoyTakipAPI.CQRS.Commands
 
         public async Task<bool> Handle(UpdateHalkaArzCommand request, CancellationToken cancellationToken)
         {
-            // 1. Veritabanından güncellenecek kaydı bul
-            var arz = await _context.HalkaArzlar.FindAsync(new object[] { request.Id }, cancellationToken);
+            // 1. Veritabanından güncellenecek kaydı bul (İlişkiler dahil!)
+            var arz = await _context.HalkaArzlar
+                .Include(h => h.Konsorsiyumlar) // Eski bankaları da getir ki üzerine yazabilelim
+                .FirstOrDefaultAsync(h => h.Id == request.Id, cancellationToken);
 
-            // Eğer böyle bir kayıt yoksa false dön (Controller 404 fırlatacak)
             if (arz == null)
             {
                 return false;
@@ -69,7 +75,6 @@ namespace PortfoyTakipAPI.CQRS.Commands
             arz.TalepToplamaBitis = request.TalepToplamaBitis;
             arz.ToplamDagilacakLot = request.ToplamDagilacakLot;
             arz.Sektor = request.Sektor;
-            arz.KonsorsiyumLideri = request.KonsorsiyumLideri;
             arz.KatilimEndeksineUygunMu = request.KatilimEndeksineUygunMu;
             arz.GerceklesenKatilimciSayisi = request.GerceklesenKatilimciSayisi;
             arz.SirketOzeti = request.SirketOzeti;
@@ -90,7 +95,22 @@ namespace PortfoyTakipAPI.CQRS.Commands
                 ? JsonSerializer.Serialize(request.Taahhutler)
                 : null;
 
-            // 3. Değişiklikleri kaydet
+            // 3. YENİ EKLENDİ: Banka / Konsorsiyum Güncellemesi
+            arz.Konsorsiyumlar.Clear(); // Önce eskileri tamamen temizle
+
+            if (request.KonsorsiyumIds != null && request.KonsorsiyumIds.Any())
+            {
+                var yeniBankalar = await _context.Konsorsiyumlar
+                    .Where(k => request.KonsorsiyumIds.Contains(k.Id))
+                    .ToListAsync(cancellationToken);
+
+                foreach (var banka in yeniBankalar)
+                {
+                    arz.Konsorsiyumlar.Add(banka); // Yenileri ata
+                }
+            }
+
+            // 4. Değişiklikleri kaydet
             await _context.SaveChangesAsync(cancellationToken);
 
             return true;

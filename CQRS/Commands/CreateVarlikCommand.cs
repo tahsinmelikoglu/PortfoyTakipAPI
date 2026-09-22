@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Identity.Client;
 using PortfoyTakipAPI.Hubs;
 using PortfoyTakipAPI.Models;
 using PortfoyTakipAPI.Repositories;
@@ -16,16 +15,15 @@ namespace PortfoyTakipAPI.CQRS.Commands
         public string VarlikTuru { get; set; }
         public decimal Miktar { get; set; }
         public decimal AlisFiyati { get; set; }
-        public DateTime AlimTarihi  { get; set; }
+        public DateTime AlimTarihi { get; set; }
         public string KullaniciId { get; set; }
     }
 
     public class CreateVarlikCommandHandler : IRequestHandler<CreateVarlikCommand, Varlik>
     {
         private readonly IVarlikRepository _repository;
-        private readonly IHubContext<PortfoyHub> _hubContext; // YENİ: SignalR Kulesi
+        private readonly IHubContext<PortfoyHub> _hubContext;
 
-        // Controller yerine Mediator, Mediator yerine de Handler kuleyi çağırıyor
         public CreateVarlikCommandHandler(IVarlikRepository repository, IHubContext<PortfoyHub> hubContext)
         {
             _repository = repository;
@@ -41,16 +39,15 @@ namespace PortfoyTakipAPI.CQRS.Commands
                 Miktar = request.Miktar,
                 AlisFiyati = request.AlisFiyati,
                 Bakiye = request.Miktar * request.AlisFiyati,
-                AlimTarihi = request.AlimTarihi
+                AlimTarihi = request.AlimTarihi == default ? DateTime.Now : request.AlimTarihi,
+                KullaniciId = string.IsNullOrWhiteSpace(request.KullaniciId) ? "zorunlu_test" : request.KullaniciId
             };
 
-            // 1. Veritabanına kalıcı olarak kaydet
             _repository.Add(yeniVarlik);
             _repository.Save();
 
-            // 2. SİHİRLİ DOKUNUŞ: Kayıt başarılı olduğu an anlık bildirim fırlat!
             await _hubContext.Clients.All.SendAsync("BildirimAl",
-                "Yeni Varlık Eklendi 🚀",
+                "Portföy Güncellendi 🚀",
                 $"{request.Miktar} adet {request.Sembol} portföye başarıyla eklendi.");
 
             return await Task.FromResult(yeniVarlik);

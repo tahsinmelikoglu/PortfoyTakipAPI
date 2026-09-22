@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace PortfoyTakipAPI.Controllers
 {
-    [Authorize] // Sınıf seviyesinde olduğu için tüm metotlar artık güvenli
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class VarliklarController : ControllerBase
@@ -39,11 +39,24 @@ namespace PortfoyTakipAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] CreateVarlikCommand command)
         {
-            // YENİ: Dışarıdan ID gönderilse bile eziyoruz, Token'daki asıl sahibin ID'sini basıyoruz
-            command.KullaniciId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var tokenUserId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                              ?? User.FindFirst("sub")?.Value
+                              ?? User.FindFirst("id")?.Value;
+
+            command.KullaniciId = string.IsNullOrEmpty(tokenUserId) ? "test_kullanicisi" : tokenUserId;
 
             var eklenenVarlik = await _mediator.Send(command);
             return Ok(eklenenVarlik);
+        }
+
+
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            _varlikService.Delete(id);
+            return Ok("Varlık portföyden başarıyla silindi.");
         }
 
         [HttpPut("{id}")]
@@ -54,21 +67,12 @@ namespace PortfoyTakipAPI.Controllers
                 return BadRequest("URL'deki ID ile güncellenmek istenen verinin ID'si uyuşmuyor!");
             }
 
-            // YENİ: Başkasının verisini güncelleyemesin diye işlemi yapanın ID'sini DTO'ya ekliyoruz
             varlikDto.KullaniciId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             _varlikService.Update(varlikDto);
             return Ok("Varlık başarıyla güncellendi.");
         }
 
-        [Authorize(Roles = "Admin")]
-        [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
-        {
-            // Bu metot zaten sadece "Admin" rolüne açık olduğu için 
-            // Admin herkesin verisini silebilsin diye KullaniciId kısıtlaması koymuyoruz.
-            _varlikService.Delete(id);
-            return Ok("Varlık portföyden başarıyla silindi.");
-        }
+
     }
 }

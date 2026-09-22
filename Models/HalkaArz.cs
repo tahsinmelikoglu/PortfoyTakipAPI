@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -34,15 +35,27 @@ namespace PortfoyTakipAPI.Models
         [MaxLength(50)]
         public string? Sektor { get; set; }
 
-        [MaxLength(100)]
-        public string? KonsorsiyumLideri { get; set; }
-
+        public ICollection<Konsorsiyum> Konsorsiyumlar { get; set; }
         public bool KatilimEndeksineUygunMu { get; set; }
 
         public int? GerceklesenKatilimciSayisi { get; set; }
 
         // =======================================================
-        // --- YENİ EKLENEN ARAYÜZ (FRONT-END) BESLEME ALANLARI ---
+        // --- CANLI BORSA VE GRAFİK BİLGİLERİ (YENİ EKLENDİ) ---
+        // =======================================================
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal? GuncelFiyat { get; set; } // Anlık veya gün sonu fiyatı
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal? GunlukDegisimYuzdesi { get; set; } // Örn: 5.12 veya -2.10
+
+        public string? FiyatGecmisiJson { get; set; } // Sparkline grafiği için son günlerin fiyat dizisi. Örn: "[110.5, 112.0, 108.5, 118.44]"
+
+        public DateTime? BorsaVerisiSonGuncelleme { get; set; } // Yahoo Finance'den en son ne zaman veri çekildi?
+
+        // =======================================================
+        // --- ARAYÜZ (FRONT-END) BESLEME ALANLARI ---
         // =======================================================
 
         [MaxLength(500)]
@@ -71,13 +84,12 @@ namespace PortfoyTakipAPI.Models
         public string? FinansalBorcluluk { get; set; } // Örn: "Düşük (Kaldıraç %30)"
 
         // --- KOLEKSİYONLAR (JSON OLARAK SAKLANACAK) ---
-        // API'ye JSON Array string'i olarak gelip, DB'de string saklanacak.
-        // EF Core 8/10 ile doğrudan JSON Column olarak yönetebiliriz.
-
         public string? FonKullanimYerleriJson { get; set; }
         // Örn: "[{\"alan\":\"GES Yatırımı\",\"oran\":70,\"renk\":\"success\"}]"
 
         public string? TaahhutlerJson { get; set; }
-        // Örn: "[\"1 Yıl Ortak Satışı Yok\",\"30 Gün Fiyat İstikrarı\"]"
+        // Örn: "[\"1 Yıl Ortak Satışı Yok\",\"30 Gün Fiyat İstikrarı\"]
+
+        public string? ZamanGecmisiJson { get; set; } // YENİ: Tarih ve saat dizisi (Örn: ["10.09 10:00", "11.09 10:00", ...])
     }
 }

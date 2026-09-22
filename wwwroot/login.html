@@ -118,7 +118,8 @@
                     const token = data.accessToken || data.AccessToken;
                     if (token) {
                         localStorage.setItem('token', token);
-                        window.location.href = 'dashboard.html';
+                        // YÖNLENDİRME KISMI GÜNCELLENDİ: Artık index.html'e gidiyor
+                        window.location.href = 'index.html';
                     }
                 } else {
                     mesajGoster('danger', 'Kullanıcı adı veya şifre hatalı.');

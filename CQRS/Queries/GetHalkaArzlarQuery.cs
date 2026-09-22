@@ -4,7 +4,7 @@ using PortfoyTakipAPI.Models;
 using PortfoyTakipAPI.DTOs;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json; // JsonSerializer için eklendi
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -26,7 +26,11 @@ namespace PortfoyTakipAPI.CQRS.Queries
 
         public async Task<List<HalkaArzListesiDTO>> Handle(GetHalkaArzlarQuery request, CancellationToken cancellationToken)
         {
-            var tumArzlar = await _context.HalkaArzlar.AsNoTracking().ToListAsync(cancellationToken);
+
+            var tumArzlar = await _context.HalkaArzlar
+                .Include(h => h.Konsorsiyumlar)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
 
             var genelPiyasaOrtalamasi = tumArzlar
                 .Where(x => x.GerceklesenKatilimciSayisi != null && x.GerceklesenKatilimciSayisi > 0)
@@ -51,11 +55,28 @@ namespace PortfoyTakipAPI.CQRS.Queries
                     Statu = arz.Statu,
                     TalepToplamaBaslangic = arz.TalepToplamaBaslangic.ToString("dd.MM.yyyy"),
                     TalepToplamaBitis = arz.TalepToplamaBitis.ToString("dd.MM.yyyy"),
-                    ToplamDagilacakLot = arz.ToplamDagilacakLot, // BU SATIRI EKLE
+                    ToplamDagilacakLot = arz.ToplamDagilacakLot,
                     Sektor = arz.Sektor,
-                    KonsorsiyumLideri = arz.KonsorsiyumLideri,
+
+                    // Banka ID'leri ve İsimleri ayrıştırılıyor
+                    KonsorsiyumIds = arz.Konsorsiyumlar != null ? arz.Konsorsiyumlar.Select(k => k.Id).ToList() : new List<int>(),
+                    KonsorsiyumIsimleri = arz.Konsorsiyumlar != null ? arz.Konsorsiyumlar.Select(k => k.KurumAdi).ToList() : new List<string>(),
+
                     KatilimEndeksineUygunMu = arz.KatilimEndeksineUygunMu,
                     GerceklesenKatilimciSayisi = arz.GerceklesenKatilimciSayisi,
+
+                    // ==========================================
+                    // YENİ EKLENEN CANLI BORSA ATAMALARI
+                    // ==========================================
+                    GuncelFiyat = arz.GuncelFiyat,
+                    GunlukDegisimYuzdesi = arz.GunlukDegisimYuzdesi,
+                    FiyatGecmisi = !string.IsNullOrEmpty(arz.FiyatGecmisiJson)
+                        ? JsonSerializer.Deserialize<List<decimal>>(arz.FiyatGecmisiJson)
+                        : new List<decimal>(),
+                    ZamanGecmisi = !string.IsNullOrEmpty(arz.ZamanGecmisiJson)
+                        ? JsonSerializer.Deserialize<List<string>>(arz.ZamanGecmisiJson)
+                        : new List<string>(),
+                    // ==========================================
 
                     SektorOrtalamasi = tumArzlar
                         .Where(x => x.Sektor == arz.Sektor && x.GerceklesenKatilimciSayisi != null && x.GerceklesenKatilimciSayisi > 0)
@@ -65,7 +86,6 @@ namespace PortfoyTakipAPI.CQRS.Queries
 
                     GenelPiyasaOrtalamasi = genelPiyasaOrtalamasi,
 
-                    // --- YENİ EKLENEN VİZYONER ALANLARIN DÖNÜŞÜMÜ ---
                     SirketOzeti = arz.SirketOzeti,
                     DagitimYontemi = arz.DagitimYontemi,
                     ArzBuyukluguTL = arz.ArzBuyukluguTL,
@@ -75,7 +95,6 @@ namespace PortfoyTakipAPI.CQRS.Queries
                     FinansalKarMarji = arz.FinansalKarMarji,
                     FinansalBorcluluk = arz.FinansalBorcluluk,
 
-                    // JSON formatında tutulan verileri Arayüz için Nesneye çeviriyoruz
                     FonKullanimYerleri = !string.IsNullOrEmpty(arz.FonKullanimYerleriJson)
                         ? JsonSerializer.Deserialize<object>(arz.FonKullanimYerleriJson)
                         : null,

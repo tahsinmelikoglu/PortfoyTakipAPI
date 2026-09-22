@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PortfoyTakipAPI.Controllers
 {
-    [Authorize]
+    [Authorize] // Sınıf bazında: Sisteme giriş yapmamış HİÇ KİMSE bu controller'a erişemez.
     [Route("api/[controller]")]
     [ApiController]
     public class HalkaArzlarController : ControllerBase
@@ -19,8 +19,7 @@ namespace PortfoyTakipAPI.Controllers
             _mediator = mediator;
         }
 
-        // 1. GET METODU: Halka arz listesini getirir (Az önce yazdığımız Query)
-        // İstersek api/HalkaArzlar?statu=Yaklaşan şeklinde filtreleme de yapabiliriz
+        // 1. GET METODU: Halka arz listesini getirir
         [HttpGet]
         public async Task<IActionResult> GetHalkaArzlar([FromQuery] string statu = null)
         {
@@ -39,7 +38,9 @@ namespace PortfoyTakipAPI.Controllers
 
             return Ok(result);
         }
+
         [HttpPost]
+        [Authorize(Roles = "Admin")] // Sadece Admin rolüne sahip olanlar yeni arz ekleyebilir
         public async Task<IActionResult> CreateHalkaArz([FromBody] PortfoyTakipAPI.CQRS.Commands.CreateHalkaArzCommand command)
         {
             var id = await _mediator.Send(command);
@@ -47,9 +48,9 @@ namespace PortfoyTakipAPI.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")] // Sadece Admin güncelleyebilir
         public async Task<IActionResult> UpdateHalkaArz(int id, [FromBody] PortfoyTakipAPI.CQRS.Commands.UpdateHalkaArzCommand command)
         {
-            // URL'deki Id ile Body'den gelen Id uyuşuyor mu güvenlik kontrolü
             if (id != command.Id)
             {
                 return BadRequest(new { Message = "URL'deki ID ile gönderilen verinin ID'si uyuşmuyor." });
@@ -66,6 +67,7 @@ namespace PortfoyTakipAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")] // Sadece Admin silebilir
         public async Task<IActionResult> DeleteHalkaArz(int id)
         {
             var command = new PortfoyTakipAPI.CQRS.Commands.DeleteHalkaArzCommand { Id = id };

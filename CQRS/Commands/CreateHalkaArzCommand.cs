@@ -3,8 +3,10 @@ using System.Text.Json;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using PortfoyTakipAPI.Models;
-
+using System;
 
 namespace PortfoyTakipAPI.CQRS.Commands
 {
@@ -28,7 +30,10 @@ namespace PortfoyTakipAPI.CQRS.Commands
         public int ToplamDagilacakLot { get; set; }
 
         public string? Sektor { get; set; }
-        public string? KonsorsiyumLideri { get; set; }
+
+        // YENİ EKLENDİ: Banka/Aracı Kurum ID'lerini alacak liste
+        public List<int>? KonsorsiyumIds { get; set; }
+
         public bool KatilimEndeksineUygunMu { get; set; }
         public int? GerceklesenKatilimciSayisi { get; set; }
         public string? SirketOzeti { get; set; }
@@ -48,7 +53,7 @@ namespace PortfoyTakipAPI.CQRS.Commands
     // Handler Nesnesi (Veritabanı İşlemi)
     public class CreateHalkaArzCommandHandler : IRequestHandler<CreateHalkaArzCommand, int>
     {
-        private readonly AppDbContext _context; // Kendi DbContext adınla değiştir
+        private readonly AppDbContext _context;
 
         public CreateHalkaArzCommandHandler(AppDbContext context)
         {
@@ -67,7 +72,6 @@ namespace PortfoyTakipAPI.CQRS.Commands
                 TalepToplamaBitis = request.TalepToplamaBitis,
                 ToplamDagilacakLot = request.ToplamDagilacakLot,
                 Sektor = request.Sektor,
-                KonsorsiyumLideri = request.KonsorsiyumLideri,
                 KatilimEndeksineUygunMu = request.KatilimEndeksineUygunMu,
                 GerceklesenKatilimciSayisi = request.GerceklesenKatilimciSayisi,
                 SirketOzeti = request.SirketOzeti,
@@ -79,15 +83,26 @@ namespace PortfoyTakipAPI.CQRS.Commands
                 FinansalKarMarji = request.FinansalKarMarji,
                 FinansalBorcluluk = request.FinansalBorcluluk,
 
-                // C# List objelerini MSSQL'e kaydetmek üzere JSON String'e dönüştürüyoruz
                 FonKullanimYerleriJson = request.FonKullanimYerleri != null
                     ? JsonSerializer.Serialize(request.FonKullanimYerleri)
                     : null,
 
                 TaahhutlerJson = request.Taahhutler != null
                     ? JsonSerializer.Serialize(request.Taahhutler)
-                    : null
+                    : null,
+
+                Konsorsiyumlar = new List<Konsorsiyum>()
             };
+
+            // YENİ EKLENDİ: Gelen ID'lere göre Bankaları DB'den bul ve arz'a bağla
+            if (request.KonsorsiyumIds != null && request.KonsorsiyumIds.Any())
+            {
+                var bankalar = await _context.Konsorsiyumlar
+                    .Where(k => request.KonsorsiyumIds.Contains(k.Id))
+                    .ToListAsync(cancellationToken);
+
+                halkaArz.Konsorsiyumlar = bankalar;
+            }
 
             _context.HalkaArzlar.Add(halkaArz);
             await _context.SaveChangesAsync(cancellationToken);

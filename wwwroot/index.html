@@ -1,0 +1,653 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ana Sayfa — TahsinPortfoy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Mini ve Büyük Grafikler İçin ApexCharts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <script>
+        if (!localStorage.getItem('token')) {
+            window.location.replace('login.html');
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f4f7f6;
+            font-family: 'Inter', sans-serif;
+            color: #1e293b;
+            margin: 0;
+            padding-top: 110px;
+        }
+
+        .navbar-custom {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 72px;
+            background: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            z-index: 1000;
+        }
+
+        .navbar-brand-custom {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #fff;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .nav-menu-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+            .nav-menu-links a {
+                color: #94a3b8;
+                text-decoration: none;
+                font-size: 14px;
+                font-weight: 500;
+                transition: color 0.2s;
+            }
+
+                .nav-menu-links a:hover, .nav-menu-links a.active {
+                    color: #38c6ec;
+                }
+
+        /* Üstteki Borsa Ticker Barı */
+        .ticker-bar {
+            position: fixed;
+            top: 72px;
+            left: 0;
+            right: 0;
+            height: 38px;
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            z-index: 999;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            overflow: hidden;
+        }
+
+        .ticker-item {
+            margin-right: 30px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.3s;
+        }
+
+        .text-green {
+            color: #10b981;
+        }
+
+        .text-red {
+            color: #ef4444;
+        }
+
+        .dashboard-wrapper {
+            max-width: 1350px;
+            margin: 0 auto;
+            padding: 20px 30px;
+        }
+
+        .custom-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            margin-bottom: 20px;
+        }
+
+        .card-header-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+
+        /* Akordeon Tablo Stilleri */
+        .live-row {
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+            .live-row:hover, .live-row.expanded {
+                background-color: #f8fafc;
+            }
+
+        /* Açılan Detay Alanı (Akordeon Gövdesi) */
+        .accordion-detail-row {
+            background-color: #f8fafc;
+            border-bottom: 2px solid #e2e8f0 !important;
+        }
+
+        .accordion-detail-content {
+            padding: 20px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            margin: 10px 0 20px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        }
+
+        .symbol-text {
+            font-weight: 700;
+            color: #0f172a;
+            font-size: 15px;
+            display: block;
+        }
+
+        .company-text {
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .price-text {
+            font-weight: 700;
+            font-size: 15px;
+            color: #0f172a;
+        }
+
+        .badge-green {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .badge-red {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .badge-neutral {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        /* Sağ Taraf Widget Stilleri */
+        .widget-item {
+            padding: 12px 0;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+
+            .widget-item:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+        .widget-title {
+            font-weight: 600;
+            font-size: 13px;
+            color: #0f172a;
+        }
+
+        .widget-subtitle {
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .widget-value {
+            font-weight: 700;
+            font-size: 14px;
+            color: #10b981;
+        }
+
+        .profile-wrapper {
+            position: relative;
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 15px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            display: none;
+            flex-direction: column;
+            width: 250px;
+            z-index: 1001;
+        }
+
+            .profile-dropdown.show {
+                display: flex;
+            }
+
+        .profile-header {
+            padding: 20px;
+            gap: 15px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #f1f5f9;
+            background: #f8fafc;
+        }
+
+        .profile-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #38c6ec;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .profile-menu {
+            padding: 10px 0;
+        }
+
+            .profile-menu a {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 10px 20px;
+                color: #475569;
+                text-decoration: none;
+                font-size: 13px;
+                font-weight: 500;
+            }
+
+                .profile-menu a:hover {
+                    background: #f8fafc;
+                    color: #0f172a;
+                }
+    </style>
+</head>
+<body>
+
+    <header class="navbar-custom">
+        <a href="index.html" class="navbar-brand-custom">
+            <svg style="width:26px; height:26px;" viewBox="0 0 26 25" fill="none">
+                <path d="M9.45 24.95 L7.07 24.09 L5.56 23.30 L3.33 21.03 L2.31 19.44 L0.74 16.05 L0.27 13.91 L0.29 11.25 L0.80 8.75 L1.95 6.20 L3.26 4.50 L5.15 2.67 L7.77 1.02 L9.91 0.18 L12.16 -0.20 L15.22 -0.16 L17.61 0.35 L19.30 1.06 L20.88 2.06 L22.23 3.37 L24.01 5.48 L24.76 6.58 L25.70 8.63 L26.00 10.35 L26.02 11.35 L25.54 12.12 L24.96 12.32 L22.35 12.36 L21.46 12.18 L20.78 11.85 L20.32 11.37 L19.45 9.56 L17.88 7.58 L16.59 6.60 L14.59 5.84 L13.24 5.69 L11.54 5.93 L10.47 6.44 L9.12 7.35 L7.92 8.50 L6.70 10.55 L6.26 12.65 L6.41 14.36 L7.14 15.86 L8.63 17.79 L12.57 20.70 L12.96 21.60 L13.13 22.82 L12.93 24.36 L12.65 24.86 L12.03 25.35 L11.27 25.42 L9.45 24.95 Z" fill="#38c6ec" />
+            </svg>
+            TahsinPortfoy
+        </a>
+
+        <div class="nav-menu-links">
+            <a href="index.html" class="active fw-semibold text-white"><i class="bi bi-house-door me-1"></i> Ana Sayfa</a>
+            <a href="portfoy.html"><i class="bi bi-wallet2 me-1"></i> Portföyüm</a>
+            <a href="halkaarz.html"><i class="bi bi-rocket-takeoff me-1"></i> Halka Arz</a>
+            <a href="konsorsiyum.html"><i class="bi bi-bank me-1"></i> Konsorsiyum Liderleri</a>
+        </div>
+
+        <div class="profile-wrapper">
+            <button class="btn p-0 border-0 shadow-none" onclick="toggleProfil(event)">
+                <div class="bg-info bg-opacity-25 text-info rounded-circle d-flex align-items-center justify-content-center border border-info border-opacity-50" style="width: 36px; height: 36px; font-weight: 600;">TM</div>
+            </button>
+            <div class="profile-dropdown" id="profil-kutusu">
+                <div class="profile-header">
+                    <div class="profile-avatar">TM</div>
+                    <div>
+                        <div class="fw-bold" style="font-size: 14px; color: #1e293b;">Tahsin Melikoğlu</div>
+                        <div style="font-size: 11px; color: #64748b;">tahsin@tahsinportfoy.com</div>
+                    </div>
+                </div>
+                <div class="profile-menu">
+                    <a href="admin.html"><i class="bi bi-shield-lock"></i> Yönetim Paneli</a>
+                    <a href="#" class="text-danger" onclick="cikisYap()"><i class="bi bi-box-arrow-right"></i> Çıkış Yap</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Borsa Ticker Barı (Canlı Veri Alanı) -->
+    <div class="ticker-bar">
+        <marquee behavior="scroll" direction="left" scrollamount="4">
+            <span class="ticker-item" id="ticker-bist100">BIST 100 <span class="text-muted">Yükleniyor...</span></span>
+            <span class="ticker-item" id="ticker-bist30">BIST 30 <span class="text-muted">Yükleniyor...</span></span>
+            <span class="ticker-item" id="ticker-usd">USD/TRY <span class="text-muted">Yükleniyor...</span></span>
+            <span class="ticker-item" id="ticker-xbank">XBANK <span class="text-muted">Yükleniyor...</span></span>
+            <span class="ticker-item" id="ticker-xusin">XUSIN <span class="text-muted">Yükleniyor...</span></span>
+        </marquee>
+    </div>
+
+    <main class="dashboard-wrapper row g-4">
+        <!-- SOL PANEL: CANLI HALKA ARZLAR -->
+        <div class="col-lg-8">
+            <div class="custom-card h-100">
+                <div class="card-header-title justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-activity text-primary fs-5"></i> SON İŞLEM GÖREN HALKA ARZLAR
+                    </div>
+                    <span class="badge bg-danger rounded-pill px-3 py-1 fw-bold"><i class="bi bi-record-circle"></i> CANLI</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-borderless live-table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Sembol</th>
+                                <th>Son Fiyat</th>
+                                <th>Günlük %</th>
+                                <th>Grafik (7G)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="canli-arzlar-tablosu">
+                            <tr><td colspan="4" class="text-center py-5 text-muted"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Piyasa verileri yükleniyor...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SAĞ PANEL: WIDGETLAR -->
+        <div class="col-lg-4 d-flex flex-column gap-4">
+
+            <div class="custom-card m-0 p-4">
+                <div class="card-header-title text-info border-0 mb-2 pb-0"><i class="bi bi-calendar-event fs-5"></i> YAKLAŞAN HALKA ARZLAR</div>
+                <div id="yaklasan-arzlar-alani" class="text-muted small mt-2">Yükleniyor...</div>
+            </div>
+
+            <div class="custom-card m-0 p-4">
+                <div class="card-header-title text-success border-0 mb-3 pb-0"><i class="bi bi-cash-coin fs-5"></i> TEMETTÜ TAKVİMİ</div>
+                <div class="widget-item d-flex justify-content-between align-items-center">
+                    <div><div class="widget-subtitle">20 Eylül 2026</div><div class="widget-title">FROTO</div></div>
+                    <div class="widget-value text-success">14.50 TL <span class="small text-muted">(%4.5)</span></div>
+                </div>
+                <div class="widget-item d-flex justify-content-between align-items-center">
+                    <div><div class="widget-subtitle">25 Eylül 2026</div><div class="widget-title">TUPRS</div></div>
+                    <div class="widget-value text-success">11.20 TL <span class="small text-muted">(%6.2)</span></div>
+                </div>
+            </div>
+
+            <div class="custom-card m-0 p-4" style="background-color: #fffbeb; border-color: #fde68a;">
+                <div class="card-header-title text-warning border-0 mb-2 pb-0"><i class="bi bi-lightbulb fs-5"></i> GÜNÜN İPUCU</div>
+                <div class="widget-title mt-2 mb-1">Bileşik Getiri Nedir?</div>
+                <p class="text-muted small m-0 lh-lg">Kazanılan kârın veya alınan temettünün tekrar anaparaya eklenerek yatırıma dönüştürülmesidir. Uzun vadeli temettü yatırımlarında, kar topu etkisi yaratarak portföy büyümesini katlayarak hızlandırır.</p>
+            </div>
+
+            <div class="custom-card m-0 p-4">
+                <div class="card-header-title text-primary border-0 mb-3 pb-0"><i class="bi bi-newspaper fs-5"></i> SEKTÖR HABERLERİ</div>
+                <div class="widget-item">
+                    <p class="small text-dark m-0 fw-medium">TCMB faiz kararı açıklandı, piyasa beklentileri ile uyumlu gerçekleşti.</p>
+                </div>
+                <div class="widget-item border-0 pb-0">
+                    <p class="small text-dark m-0 fw-medium">SPK, yeni haftada 2 şirketin daha izahnamesini onayladı.</p>
+                </div>
+            </div>
+
+        </div>
+        <footer class="mt-5 py-4 border-top" style="background-color: #f8fafc; width: 100%;">
+            <div class="container text-center opacity-75">
+                <p class="mb-2 mx-auto text-secondary" style="font-size: 10px; line-height: 1.6; max-width: 850px;">
+                    <span style="font-weight: 500;">Yasal Uyarı:</span> Burada yer alan yatırım bilgi, yorum ve tavsiyeleri yatırım danışmanlığı kapsamında değildir. Simülatör ve hesaplama araçları tarafından sunulan veriler tamamen varsayımsal olup, kesin getiri garantisi vermez. Alınan kararlardan doğabilecek maddi/manevi zararlardan sistem sorumlu tutulamaz.
+                </p>
+                <p class="mb-0 mt-2 text-secondary" style="font-size: 11px;">
+                    &copy; 2026 Tahsin Melikoğlu. Tüm Hakları Saklıdır.
+                </p>
+            </div>
+        </footer>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const API_URL = '/api/HalkaArzlar';
+        let aktifAcikRowId = null;
+        window.hisseVerileriTablosu = {};
+
+        document.addEventListener('DOMContentLoaded', () => {
+            verileriCekVeEkranaBas();
+
+            // Canlı Piyasa Ticker'ını başlat
+            piyasaVerileriniGuncelle();
+            setInterval(piyasaVerileriniGuncelle, 5000); // 5 saniyede bir canlandır
+        });
+
+        async function piyasaVerileriniGuncelle() {
+            try {
+                // Veriyi tamamen kendi Backend'imizden (C# PiyasaController) güvenle çekiyoruz
+                const response = await fetch('/api/Piyasa/ozet');
+                if (!response.ok) throw new Error('Sunucudan veri alınamadı');
+                const data = await response.json();
+
+                const guncelleDOM = (id, baslik, deger, yuzde, isCurrency = false) => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+
+                    const isPositive = yuzde >= 0;
+                    const renkClass = isPositive ? 'text-green' : 'text-red';
+                    const ikon = isPositive ? '<i class="bi bi-caret-up-fill"></i>' : '<i class="bi bi-caret-down-fill"></i>';
+                    const formatliDeger = isCurrency ? deger.toFixed(2) : deger.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    const formatliYuzde = Math.abs(yuzde).toFixed(2);
+
+                    el.innerHTML = `${baslik} <span class="text-dark">${formatliDeger}</span> <span class="${renkClass}">${ikon} %${formatliYuzde}</span>`;
+                };
+
+                guncelleDOM('ticker-bist100', 'BIST 100', data.bist100.deger, data.bist100.yuzde);
+                guncelleDOM('ticker-bist30', 'BIST 30', data.bist30.deger, data.bist30.yuzde);
+                guncelleDOM('ticker-usd', 'USD/TRY', data.usdTry.deger, data.usdTry.yuzde, true);
+                guncelleDOM('ticker-xbank', 'XBANK', data.xbank.deger, data.xbank.yuzde);
+                // XUSIN'i listeden silebilir veya HTML tarafında ticker-xusin id'li span'ı kaldırabilirsin.
+
+            } catch (error) {
+                console.error("Piyasa verileri çekilemedi:", error);
+            }
+        }
+
+        // 2. HALKA ARZ VERİLERİNİ ÇEKME FONKSİYONU
+        async function verileriCekVeEkranaBas() {
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch(API_URL, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!response.ok) throw new Error('API Hatası');
+                const arzlar = await response.json();
+
+                const islemGorenler = arzlar
+                    .filter(a => a.statu === 'İşlem Gören')
+                    .sort((a, b) => new Date(b.talepToplamaBaslangic) - new Date(a.talepToplamaBaslangic))
+                    .slice(0, 5);
+
+                const tbody = document.getElementById('canli-arzlar-tablosu');
+                tbody.innerHTML = '';
+
+                if (islemGorenler.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted">Şu an işlem gören veri bulunmuyor.</td></tr>';
+                } else {
+                    islemGorenler.forEach(arz => {
+                        const fiyatGosterim = arz.guncelFiyat ? arz.guncelFiyat.toLocaleString('tr-TR', { minimumFractionDigits: 2 }) : '-';
+
+                        let yuzdeBadge = '<span class="badge-neutral">0.00%</span>';
+                        let isPositive = true;
+
+                        if (arz.gunlukDegisimYuzdesi !== null && arz.gunlukDegisimYuzdesi !== undefined) {
+                            if (arz.gunlukDegisimYuzdesi > 0) {
+                                yuzdeBadge = `<span class="badge-green">+${arz.gunlukDegisimYuzdesi.toFixed(2)}%</span>`;
+                            } else if (arz.gunlukDegisimYuzdesi < 0) {
+                                yuzdeBadge = `<span class="badge-red">${arz.gunlukDegisimYuzdesi.toFixed(2)}%</span>`;
+                                isPositive = false;
+                            }
+                        }
+
+                        const rowId = `row-${arz.borsaKodu}`;
+                        const detailId = `detail-${arz.borsaKodu}`;
+                        const chartDivId = `big-chart-${arz.borsaKodu}`;
+                        const miniChartId = `chart-${arz.borsaKodu}`;
+
+                        window.hisseVerileriTablosu[arz.borsaKodu] = {
+                            gecmis: arz.fiyatGecmisi || [],
+                            zaman: arz.zamanGecmisi || [],
+                            isPositive: isPositive
+                        };
+
+                        const mainHtml = `
+                                    <tr class="live-row" id="${rowId}" onclick="akordiyonToggle('${arz.borsaKodu}')">
+                                        <td>
+                                            <span class="symbol-text">${arz.borsaKodu} <i class="bi bi-chevron-down small text-muted float-end"></i></span>
+                                            <span class="company-text">${arz.sirketAdi}</span>
+                                        </td>
+                                        <td><span class="price-text">${fiyatGosterim}</span></td>
+                                        <td>${yuzdeBadge}</td>
+                                        <td style="width: 150px;">
+                                            <div id="${miniChartId}"></div>
+                                        </td>
+                                    </tr>
+                                `;
+                        tbody.insertAdjacentHTML('beforeend', mainHtml);
+
+                        const detailHtml = `
+                                    <tr id="${detailId}" style="display: none;" class="accordion-detail-row">
+                                        <td colspan="4">
+                                            <div class="accordion-detail-content">
+                                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                                    <div>
+                                                        <h6 class="fw-bold m-0 text-dark">${arz.borsaKodu} - Detaylı Fiyat Grafiği</h6>
+                                                        <small class="text-muted">Fiyat trendi ve zaman damgaları</small>
+                                                    </div>
+                                                    <span class="badge bg-light text-dark border">${arz.sektor || 'Sektör Belirtilmedi'}</span>
+                                                </div>
+                                                <div id="${chartDivId}"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `;
+                        tbody.insertAdjacentHTML('beforeend', detailHtml);
+
+                        if (arz.fiyatGecmisi && arz.fiyatGecmisi.length > 0) {
+                            cizSparkline(miniChartId, arz.fiyatGecmisi, isPositive);
+                        } else {
+                            document.getElementById(miniChartId).innerHTML = '<span class="text-muted small">Veri Yok</span>';
+                        }
+                    });
+                }
+
+                const yaklasanlar = arzlar.filter(a => a.statu === 'Yaklaşan' || a.statu === 'Talep Toplayan');
+                const yaklasanDiv = document.getElementById('yaklasan-arzlar-alani');
+                yaklasanDiv.innerHTML = '';
+                if (yaklasanlar.length === 0) {
+                    yaklasanDiv.innerHTML = 'Şu an yaklaşan halka arz bulunmuyor.';
+                } else {
+                    yaklasanlar.slice(0, 3).forEach(arz => {
+                        yaklasanDiv.insertAdjacentHTML('beforeend', `
+                                    <div class="widget-item d-flex justify-content-between align-items-center">
+                                        <div><div class="widget-title text-dark">${arz.borsaKodu}</div><div class="widget-subtitle">${arz.sirketAdi}</div></div>
+                                        <div class="badge bg-info text-dark rounded-pill" style="font-size:10px;">${arz.statu}</div>
+                                    </div>
+                                `);
+                    });
+                }
+            } catch (error) {
+                document.getElementById('canli-arzlar-tablosu').innerHTML = '<tr><td colspan="4" class="text-center py-4 text-danger">Veriler yüklenirken hata oluştu.</td></tr>';
+            }
+        }
+
+        function cizSparkline(elementId, dataArray, isPositive) {
+            var options = {
+                series: [{ data: dataArray }],
+                chart: { type: 'area', width: 120, height: 40, sparkline: { enabled: true } },
+                stroke: { curve: 'smooth', width: 2 },
+                fill: {
+                    type: 'gradient',
+                    gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.05, stops: [0, 100] }
+                },
+                colors: [isPositive ? '#10b981' : '#ef4444'],
+                tooltip: { fixed: { enabled: false }, x: { show: false }, y: { title: { formatter: function () { return '' } } }, marker: { show: false } }
+            };
+            new ApexCharts(document.querySelector("#" + elementId), options).render();
+        }
+
+        function akordiyonToggle(borsaKodu) {
+            const detailRowId = `detail-${borsaKodu}`;
+            const mainRowId = `row-${borsaKodu}`;
+            const detailTr = document.getElementById(detailRowId);
+            const mainTr = document.getElementById(mainRowId);
+            const dataObj = window.hisseVerileriTablosu[borsaKodu];
+
+            if (aktifAcikRowId === detailRowId) {
+                detailTr.style.display = 'none';
+                mainTr.classList.remove('expanded');
+                aktifAcikRowId = null;
+                return;
+            }
+
+            if (aktifAcikRowId) {
+                const eskiDetail = document.getElementById(aktifAcikRowId);
+                if (eskiDetail) eskiDetail.style.display = 'none';
+                const eskiKod = aktifAcikRowId.replace('detail-', 'row-');
+                const eskiMain = document.getElementById(eskiKod);
+                if (eskiMain) eskiMain.classList.remove('expanded');
+            }
+
+            detailTr.style.display = 'table-row';
+            mainTr.classList.add('expanded');
+            aktifAcikRowId = detailRowId;
+
+            const chartDivId = `big-chart-${borsaKodu}`;
+            document.getElementById(chartDivId).innerHTML = '';
+
+            if (!dataObj || !dataObj.gecmis || dataObj.gecmis.length === 0) {
+                document.getElementById(chartDivId).innerHTML = '<div class="text-center py-4 text-muted small">Bu hisseye ait grafik verisi bulunamadı.</div>';
+            } else {
+                var options = {
+                    series: [{ name: 'Kapanış Fiyatı', data: dataObj.gecmis }],
+                    chart: { type: 'area', height: 260, toolbar: { show: false }, zoom: { enabled: false } },
+                    dataLabels: { enabled: false },
+                    stroke: { curve: 'smooth', width: 3 },
+                    fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.5, opacityTo: 0.05, stops: [0, 100] } },
+                    colors: [dataObj.isPositive ? '#10b981' : '#ef4444'],
+                    xaxis: {
+                        categories: dataObj.zaman,
+                        labels: { style: { colors: '#64748b', fontSize: '11px' } },
+                        axisBorder: { show: false },
+                        axisTicks: { show: false }
+                    },
+                    yaxis: { labels: { formatter: function (val) { return val.toFixed(2) + " TL"; } } },
+                    grid: { borderColor: '#f1f5f9', strokeDashArray: 4, yaxis: { lines: { show: true } }, xaxis: { lines: { show: true } } }
+                };
+                var chart = new ApexCharts(document.querySelector("#" + chartDivId), options);
+                chart.render();
+            }
+        }
+
+        function toggleProfil(event) { event.stopPropagation(); document.getElementById('profil-kutusu').classList.toggle('show'); }
+        document.addEventListener('click', function (event) { const profWrapper = document.querySelector('.profile-wrapper'); const profKutu = document.getElementById('profil-kutusu'); if (profWrapper && !profWrapper.contains(event.target)) { if (profKutu) profKutu.classList.remove('show'); } });
+        function cikisYap() { localStorage.removeItem('token'); window.location.href = 'login.html'; }
+    </script>
+</body>
+</html>

@@ -1,0 +1,644 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TahsinPortfoy — Halka Arz & Portföy Hedef Yönetimi</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- AUTH GUARD -->
+    <script>
+        if (!localStorage.getItem('token')) {
+            window.location.replace('login.html');
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f4f7f6;
+            font-family: 'Inter', sans-serif;
+            color: #1e293b;
+            margin: 0;
+            padding-top: 90px;
+        }
+
+        .navbar-custom {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 72px;
+            background: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .navbar-brand-custom {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #fff;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .nav-menu-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+            .nav-menu-links a {
+                color: #94a3b8;
+                text-decoration: none;
+                font-size: 14px;
+                font-weight: 500;
+                transition: color 0.2s;
+            }
+
+                .nav-menu-links a:hover, .nav-menu-links a.active {
+                    color: #38c6ec;
+                }
+
+        .dashboard-wrapper {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 20px 30px;
+        }
+
+        .custom-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            height: 100%;
+        }
+
+        .form-select:focus, .form-control:focus {
+            border-color: #38c6ec;
+            box-shadow: none;
+        }
+
+        .table > :not(caption) > * > * {
+            padding: 16px;
+            background-color: transparent;
+            border-bottom-color: #f1f5f9;
+        }
+
+        .progress-bar-animated {
+            transition: width 0.4s ease-out;
+        }
+
+        /* YENİ: Tıklanabilir Çip Stilleri */
+        .idea-chip {
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 6px 12px;
+        }
+
+            .idea-chip:hover {
+                background-color: #f8fafc !important;
+                border-color: #38c6ec !important;
+                color: #0f172a !important;
+                transform: translateY(-1px);
+            }
+
+        /* BİLDİRİM VE PROFİL DROPDOWN */
+        .notification-wrapper, .profile-wrapper {
+            position: relative;
+        }
+
+        .notification-dropdown, .profile-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 15px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            display: none;
+            flex-direction: column;
+            z-index: 1001;
+        }
+
+        .notification-dropdown {
+            width: 320px;
+        }
+
+        .profile-dropdown {
+            width: 250px;
+        }
+
+            .notification-dropdown.show, .profile-dropdown.show {
+                display: flex;
+            }
+
+        .notif-header, .profile-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            font-weight: 700;
+            color: #1e293b;
+            background: #f8fafc;
+        }
+
+        .profile-header {
+            padding: 20px;
+            gap: 15px;
+            justify-content: flex-start;
+            display: flex;
+            align-items: center;
+        }
+
+        .profile-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #38c6ec;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .profile-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .profile-email {
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .profile-menu {
+            padding: 10px 0;
+        }
+
+            .profile-menu a {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 10px 20px;
+                color: #475569;
+                text-decoration: none;
+                font-size: 13px;
+                font-weight: 500;
+            }
+
+                .profile-menu a:hover {
+                    background: #f8fafc;
+                    color: #0f172a;
+                }
+
+                .profile-menu a.text-danger:hover {
+                    background: #fef2f2;
+                    color: #dc2626;
+                }
+
+        /* AI CHAT PANEL */
+        #ai-panel-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.5);
+            z-index: 9998;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+            #ai-panel-overlay.active {
+                opacity: 1;
+                visibility: visible;
+            }
+
+        #ai-chat-panel {
+            position: fixed;
+            top: 0;
+            right: -620px;
+            width: 620px;
+            height: 100%;
+            background: #fff;
+            z-index: 9999;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+            transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+            #ai-chat-panel.active {
+                right: 0;
+            }
+
+        .ai-header {
+            padding: 24px 30px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ai-body {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: #f8fafc;
+        }
+
+        .ai-msg {
+            background: #fff;
+            padding: 18px 22px;
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 18px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #1e293b;
+        }
+
+        .ai-footer {
+            padding: 20px 30px;
+            border-top: 1px solid #f1f5f9;
+            background: #fff;
+        }
+
+        .ai-input-wrapper input {
+            font-size: 15px !important;
+            padding: 14px 20px !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="navbar-custom">
+        <a href="index.html" class="navbar-brand-custom">
+            <svg style="width:26px; height:26px;" viewBox="0 0 26 25" fill="none">
+                <path d="M9.45 24.95 L7.07 24.09 L5.56 23.30 L3.33 21.03 L2.31 19.44 L0.74 16.05 L0.27 13.91 L0.29 11.25 L0.80 8.75 L1.95 6.20 L3.26 4.50 L5.15 2.67 L7.77 1.02 L9.91 0.18 L12.16 -0.20 L15.22 -0.16 L17.61 0.35 L19.30 1.06 L20.88 2.06 L22.23 3.37 L24.01 5.48 L24.76 6.58 L25.70 8.63 L26.00 10.35 L26.02 11.35 L25.54 12.12 L24.96 12.32 L22.35 12.36 L21.46 12.18 L20.78 11.85 L20.32 11.37 L19.45 9.56 L17.88 7.58 L16.59 6.60 L14.59 5.84 L13.24 5.69 L11.54 5.93 L10.47 6.44 L9.12 7.35 L7.92 8.50 L6.70 10.55 L6.26 12.65 L6.41 14.36 L7.14 15.86 L8.63 17.79 L12.57 20.70 L12.96 21.60 L13.13 22.82 L12.93 24.36 L12.65 24.86 L12.03 25.35 L11.27 25.42 L9.45 24.95 Z" fill="#38c6ec" />
+            </svg>
+            TahsinPortfoy
+        </a>
+
+        <div class="nav-menu-links">
+            <!-- YENİ EKLENEN ANA SAYFA BUTONU -->
+            <a href="index.html"><i class="bi bi-house-door me-1"></i> Ana Sayfa</a>
+            <a href="portfoy.html" class="active text-white fw-semibold"><i class="bi bi-wallet2 me-1"></i> Portföyüm</a>
+            <a href="halkaarz.html"><i class="bi bi-rocket-takeoff me-1"></i> Halka Arz</a>
+            <a href="konsorsiyum.html"><i class="bi bi-bank me-1"></i> Konsorsiyum Liderleri</a>
+            <a href="#" onclick="toggleChat(true); return false;" class="text-info fw-semibold"><i class="bi bi-robot me-1"></i> Portföy AI Asistan</a>
+        </div>
+
+        <div class="d-flex align-items-center gap-4">
+            <div class="notification-wrapper">
+                <button class="btn btn-link text-white p-0 position-relative shadow-none" onclick="toggleBildirimler(event)">
+                    <i class="bi bi-bell fs-5"></i>
+                </button>
+                <div class="notification-dropdown" id="bildirim-kutusu">
+                    <div class="notif-header"><span>Bildirim Merkezi</span></div>
+                    <div class="notif-body p-3 text-center text-muted small">Güncel bildirim bulunmuyor.</div>
+                </div>
+            </div>
+
+            <div class="profile-wrapper">
+                <button class="btn p-0 border-0 shadow-none" onclick="toggleProfil(event)">
+                    <div class="bg-info bg-opacity-25 text-info rounded-circle d-flex align-items-center justify-content-center border border-info border-opacity-50" style="width: 36px; height: 36px; font-weight: 600;">TM</div>
+                </button>
+                <div class="profile-dropdown" id="profil-kutusu">
+                    <div class="profile-header">
+                        <div class="profile-avatar">TM</div>
+                        <div class="profile-info">
+                            <span class="profile-name">Tahsin Melikoğlu</span>
+                            <span class="profile-email">tahsin@tahsinportfoy.com</span>
+                        </div>
+                    </div>
+                    <div class="profile-menu">
+                        <a href="admin.html"><i class="bi bi-shield-lock"></i> Yönetim Paneli</a>
+                        <a href="#" class="text-danger" onclick="cikisYap()"><i class="bi bi-box-arrow-right"></i> Çıkış Yap</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard-wrapper">
+
+
+        <!-- DİNAMİK HEDEF BÖLÜMÜ -->
+        <div class="custom-card mb-4">
+            <div class="row align-items-center">
+                <div class="col-lg-4 border-end pe-4">
+                    <h5 class="fw-bold text-dark mb-2"><i class="bi bi-bullseye text-primary me-2"></i> Portföy Hedefim</h5>
+                    <p class="text-muted small mb-3">İlham almak için seçin veya kendi hedefinizi yazın.</p>
+
+                    <!-- YENİ: İLHAM FİKİRLERİ (ÇİPLER) -->
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <span class="badge bg-light text-secondary border idea-chip" onclick="hizliHedefSec('Bedelli Askerlik', 217000)">🪖 Bedelli</span>
+                        <span class="badge bg-light text-secondary border idea-chip" onclick="hizliHedefSec('İkinci El Araç', 750000)">🚗 Araç</span>
+                        <span class="badge bg-light text-secondary border idea-chip" onclick="hizliHedefSec('Yeni Bilgisayar', 120000)">💻 PC</span>
+                        <span class="badge bg-light text-secondary border idea-chip" onclick="hizliHedefSec('Tatilde Harcamalık', 30000)">🏖️ Tatil</span>
+                        <span class="badge bg-light text-secondary border idea-chip" onclick="hizliHedefSec('', '')" title="Temizle"><i class="bi bi-eraser"></i></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-muted fw-semibold">Hedef Adı</label>
+                        <input type="text" class="form-control shadow-none" id="hedef-adi" placeholder="Örn: Opel Corsa 2022" oninput="hedefiGuncelle()">
+                    </div>
+
+                    <div>
+                        <label class="form-label small text-muted fw-semibold">Hedef Tutarı (TL)</label>
+                        <input type="number" class="form-control shadow-none" id="hedef-tutar" placeholder="Örn: 850000" oninput="hedefiGuncelle()">
+                    </div>
+                </div>
+
+                <div class="col-lg-8 ps-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <h6 class="fw-bold text-dark m-0" id="hedef-baslik">Portföy Hedef İlerlemesi</h6>
+                            <p class="text-muted small m-0 mt-1">Hedefe ulaşmak için halka arz birikim süreciniz.</p>
+                        </div>
+                        <span class="badge bg-light text-primary border fs-6 px-3 py-2" id="hedef-yuzde">%0.0 Tamamlandı</span>
+                    </div>
+
+                    <div class="progress mt-4 mb-3" style="height: 14px; border-radius: 7px; background-color: #f1f5f9;">
+                        <div class="progress-bar bg-primary progress-bar-animated" id="hedef-bar" role="progressbar" style="width: 0%;"></div>
+                    </div>
+
+                    <div class="d-flex justify-content-between small text-muted fw-bold" style="font-size: 13px;">
+                        <span>0 TL</span>
+                        <span class="text-success bg-success-subtle px-2 py-1 rounded" id="aktif-portfoy-degeri">Portföy Yükleniyor...</span>
+                        <span class="text-dark" id="hedef-tutar-text">Hedef Bekleniyor</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARLIK TABLOSU -->
+        <div class="custom-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold m-0 text-dark">Halka Arz Varlıklarım</h5>
+                <span class="text-muted small"><i class="bi bi-clock-history me-1"></i> Gerçek Zamanlı Veri</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle text-nowrap">
+                    <thead>
+                        <tr class="text-muted small text-uppercase">
+                            <th>Sembol</th>
+                            <th>Tür</th>
+                            <th>Miktar</th>
+                            <th>Maliyet (Alış)</th>
+                            <th>Güncel Fiyat</th>
+                            <th>Toplam Değer</th>
+                            <th>Kâr / Zarar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="varliklarTablosu">
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-5">
+                                <div class="spinner-border spinner-border-sm text-primary mb-2"></div>
+                                <br>Portföy bilgileri yükleniyor...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <footer class="mt-5 py-4 border-top" style="background-color: #f8fafc;">
+            <div class="container text-center opacity-75">
+                <p class="mb-2 mx-auto text-secondary" style="font-size: 10px; line-height: 1.6; max-width: 850px;">
+                    <span style="font-weight: 500;">Yasal Uyarı:</span> Burada yer alan yatırım bilgi, yorum ve tavsiyeleri yatırım danışmanlığı kapsamında değildir. Simülatör ve hesaplama araçları tarafından sunulan veriler tamamen varsayımsal olup, kesin getiri garantisi vermez. Alınan kararlardan doğabilecek maddi/manevi zararlardan sistem sorumlu tutulamaz.
+                </p>
+                <p class="mb-0 mt-2 text-secondary" style="font-size: 11px;">
+                    &copy; 2026 Tahsin Melikoğlu. Tüm Hakları Saklıdır.
+                </p>
+            </div>
+        </footer>
+    </main>
+
+    <!-- AI CHAT PANEL -->
+    <div id="ai-panel-overlay" onclick="toggleChat(false)"></div>
+    <div id="ai-chat-panel">
+        <div class="ai-header">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-primary-subtle text-primary p-2 rounded-3 fs-4">🧠</div>
+                <div><h5 class="fw-bold m-0">Portföy AI Asistan</h5><small class="text-muted">Llama 3 Devrede</small></div>
+            </div>
+            <button type="button" class="btn-close shadow-none fs-5" onclick="toggleChat(false)"></button>
+        </div>
+        <div class="ai-body" id="chat-body">
+            <div class="ai-msg">Merhaba Tahsin! Hedefine giden yolda halka arz performanslarını takip ediyorum. Analiz etmemi istediğin bir durum var var mı?</div>
+        </div>
+        <div class="ai-footer">
+            <form id="chat-form" class="input-group ai-input-wrapper">
+                <input type="text" id="chat-input" class="form-control shadow-none border-end-0 bg-light" autocomplete="off" placeholder="Portföy hedefime ne kadar kaldı?" />
+                <button type="submit" id="chat-send-btn" class="btn btn-dark px-4"><i class="bi bi-send fs-5"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- BOOTSTRAP & JAVASCRIPT -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        let genelToplamDeger = 0;
+        let guncelHedef = 0;
+        let hedefAdi = "";
+
+        document.addEventListener('DOMContentLoaded', function () {
+            varliklariGetir();
+        });
+
+        // 1. DİNAMİK KULLANICI HEDEFİ YÖNETİMİ
+        function hizliHedefSec(isim, tutar) {
+            document.getElementById('hedef-adi').value = isim;
+            document.getElementById('hedef-tutar').value = tutar;
+            hedefiGuncelle();
+        }
+
+        function hedefiGuncelle() {
+            hedefAdi = document.getElementById('hedef-adi').value.trim();
+            guncelHedef = parseFloat(document.getElementById('hedef-tutar').value) || 0;
+
+            const baslik = document.getElementById('hedef-baslik');
+            if (hedefAdi !== "") {
+                baslik.innerText = hedefAdi + " İlerlemesi";
+            } else {
+                baslik.innerText = "Portföy Hedef İlerlemesi";
+            }
+
+            bariGuncelle();
+        }
+
+        function bariGuncelle() {
+            const tutarText = document.getElementById('hedef-tutar-text');
+            const yuzdeKutu = document.getElementById('hedef-yuzde');
+            const bar = document.getElementById('hedef-bar');
+
+            if (guncelHedef <= 0) {
+                tutarText.innerText = "Hedef Bekleniyor";
+                yuzdeKutu.innerText = "%0.0 Tamamlandı";
+                bar.style.width = "0%";
+                return;
+            }
+
+            tutarText.innerText = guncelHedef.toLocaleString('tr-TR') + " TL";
+
+            let yuzde = (genelToplamDeger / guncelHedef) * 100;
+            if (yuzde > 100) yuzde = 100;
+
+            yuzdeKutu.innerText = "%" + yuzde.toFixed(1) + " Tamamlandı";
+            bar.style.width = yuzde + "%";
+
+            if (yuzde === 100) {
+                yuzdeKutu.classList.replace('bg-light', 'bg-success');
+                yuzdeKutu.classList.replace('text-primary', 'text-white');
+                bar.classList.replace('bg-primary', 'bg-success');
+            } else {
+                yuzdeKutu.classList.replace('bg-success', 'bg-light');
+                yuzdeKutu.classList.replace('text-white', 'text-primary');
+                bar.classList.replace('bg-success', 'bg-primary');
+            }
+        }
+
+        // 2. VARLIKLARI GETİR VE TABLOYU DOLDUR
+        async function varliklariGetir() {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            try {
+                const response = await fetch('/api/Varliklar', {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                const tbody = document.getElementById('varliklarTablosu');
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const varliklar = data.items || data.Items || (Array.isArray(data) ? data : []);
+                    tbody.innerHTML = '';
+
+                    if (varliklar.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-5"><i class="bi bi-rocket-takeoff fs-3 d-block mb-2 text-secondary"></i>Henüz portföye eklenmiş bir halka arz bulunmuyor.<br>Halka Arzlar menüsünden şirketleri portföyünüze ekleyebilirsiniz.</td></tr>`;
+                        document.getElementById('aktif-portfoy-degeri').textContent = "0,00 TL";
+                        return;
+                    }
+
+                    genelToplamDeger = 0;
+
+                    varliklar.forEach(v => {
+                        const sembol = v.sembol || v.Sembol || '';
+                        const tur = v.varlikTuru || v.VarlikTuru || 'Hisse';
+                        const miktar = v.miktar || v.Miktar || 0;
+                        const alisFiyati = v.alisFiyati || v.AlisFiyati || 0;
+                        const guncelFiyat = v.guncelFiyat || v.GuncelFiyat || alisFiyati;
+
+                        const toplamMaliyet = alisFiyati * miktar;
+                        const toplamDeger = guncelFiyat * miktar;
+                        const karZarar = toplamDeger - toplamMaliyet;
+                        const karZararYuzde = toplamMaliyet > 0 ? (karZarar / toplamMaliyet) * 100 : 0;
+
+                        genelToplamDeger += toplamDeger;
+
+                        const badgeClass = karZarar >= 0 ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger';
+                        const karZararIcon = karZarar >= 0 ? '+' : '';
+
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                                    <td class="fw-bold">${sembol}</td>
+                                    <td><span class="badge bg-light text-dark border">${tur}</span></td>
+                                    <td>${miktar.toLocaleString()}</td>
+                                    <td>${alisFiyati.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL</td>
+                                    <td class="fw-semibold">${guncelFiyat.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL</td>
+                                    <td class="fw-bold text-primary">${toplamDeger.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL</td>
+                                    <td><span class="badge ${badgeClass} px-2 py-1 rounded fw-semibold">${karZararIcon}${karZarar.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL (${karZararIcon}${karZararYuzde.toFixed(1)}%)</span></td>
+                                `;
+                        tbody.appendChild(tr);
+                    });
+
+                    document.getElementById('aktif-portfoy-degeri').textContent = genelToplamDeger.toLocaleString('tr-TR', { minimumFractionDigits: 2 }) + " TL";
+                    hedefiGuncelle(); // Barı toplam değere göre yeniden hesapla
+                } else {
+                    throw new Error("API yanıt vermedi");
+                }
+            } catch (error) {
+                document.getElementById('varliklarTablosu').innerHTML = `<tr><td colspan="7" class="text-center text-danger py-4">Sistem hatası: Veriler alınamadı.</td></tr>`;
+            }
+        }
+
+        // 3. STANDART MENÜ VE YARDIMCI FONKSİYONLAR
+        function toggleProfil(event) { event.stopPropagation(); document.getElementById('profil-kutusu').classList.toggle('show'); document.getElementById('bildirim-kutusu').classList.remove('show'); }
+        function toggleBildirimler(event) { event.stopPropagation(); document.getElementById('bildirim-kutusu').classList.toggle('show'); document.getElementById('profil-kutusu').classList.remove('show'); }
+        document.addEventListener('click', function (event) {
+            const notifWrapper = document.querySelector('.notification-wrapper'); const notifKutu = document.getElementById('bildirim-kutusu');
+            if (notifWrapper && !notifWrapper.contains(event.target)) { if (notifKutu) notifKutu.classList.remove('show'); }
+            const profWrapper = document.querySelector('.profile-wrapper'); const profKutu = document.getElementById('profil-kutusu');
+            if (profWrapper && !profWrapper.contains(event.target)) { if (profKutu) profKutu.classList.remove('show'); }
+        });
+        function toggleChat(forceState) {
+            const panel = document.getElementById('ai-chat-panel'); const overlay = document.getElementById('ai-panel-overlay');
+            const shouldOpen = typeof forceState === 'boolean' ? forceState : !panel.classList.contains('active');
+            panel.classList.toggle('active', shouldOpen); overlay.classList.toggle('active', shouldOpen);
+            if (shouldOpen) setTimeout(() => document.getElementById('chat-input').focus(), 300);
+        }
+        function cikisYap() { localStorage.removeItem('token'); window.location.href = 'login.html'; }
+
+        // AI Sohbet Motoru
+        document.getElementById('chat-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const input = document.getElementById('chat-input');
+            const chatBody = document.getElementById('chat-body');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const userMsg = document.createElement('div');
+            userMsg.style.cssText = "background:#0f172a; color:white; padding:16px 20px; border-radius:14px 14px 0 14px; margin-bottom:18px; margin-left:auto; max-width:85%; font-size:15px; line-height:1.5;";
+            userMsg.textContent = message;
+            chatBody.appendChild(userMsg);
+            input.value = '';
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            const loading = document.createElement('div');
+            loading.className = 'ai-msg text-muted fst-italic';
+            loading.textContent = 'Llama 3 analiz ediyor... 🧠';
+            chatBody.appendChild(loading);
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            setTimeout(() => {
+                loading.remove();
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'ai-msg';
+                const isimYazisi = hedefAdi ? `[${hedefAdi}] ` : '';
+                aiMsg.textContent = "Şu an " + isimYazisi + "hedefine ulaşmak için " + (guncelHedef - genelToplamDeger).toLocaleString('tr-TR') + " TL tutarında daha kazanca ihtiyacın var. Gelen yeni arzlarla bu farkı eritebiliriz.";
+                chatBody.appendChild(aiMsg);
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

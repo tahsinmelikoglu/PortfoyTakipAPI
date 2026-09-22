@@ -2,7 +2,7 @@
 using PortfoyTakipAPI.DTOs;
 using PortfoyTakipAPI.Models;
 using PortfoyTakipAPI.Repositories;
-using PortfoyTakipAPI.Services;
+using PortfoyTakipAPI.Services; // BİST Servisini kullanabilmek için bunu ekledik
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,12 +18,13 @@ namespace PortfoyTakipAPI.CQRS.Queries
     public class GetVarliklarQueryHandler : IRequestHandler<GetVarliklarQuery, PagedResult<Varlik>>
     {
         private readonly IVarlikRepository _repository;
-        private readonly IYapayZekaService _fiyatServisi;
+        private readonly IBistService _bistService; // YENİ: BİST Servisini tanımladık
 
-        public GetVarliklarQueryHandler(IVarlikRepository repository, IYapayZekaService fiyatServisi)
+        // YENİ: BİST Servisini Constructor (Yapıcı Metot) içerisine dahil ettik
+        public GetVarliklarQueryHandler(IVarlikRepository repository, IBistService bistService)
         {
             _repository = repository;
-            _fiyatServisi = fiyatServisi;
+            _bistService = bistService;
         }
 
         public async Task<PagedResult<Varlik>> Handle(GetVarliklarQuery request, CancellationToken cancellationToken)
@@ -36,11 +37,13 @@ namespace PortfoyTakipAPI.CQRS.Queries
                     .Where(v => v.KullaniciId == request.KullaniciId)
                     .ToList();
 
+                // YENİ: Portföydeki her bir hisse için Yahoo Finance'e gidip güncel fiyatı soruyoruz
                 foreach (var varlik in filtrelenmisListe)
                 {
-                    // Artık metot "public" olduğu için sorunsuzca çağırabiliyoruz
-                    var canliFiyat = await _fiyatServisi.CanliFiyatGetirAsync(varlik.Sembol);
+                    // Eğer varlık türü Hisse ise canlı fiyat çek (Altın/Döviz vs. eklersen buraya IF koyabilirsin)
+                    var canliFiyat = await _bistService.GetHisseFiyatiAsync(varlik.Sembol);
 
+                    // Eğer API'den fiyat başarıyla geldiyse, varlığın güncel fiyatını ez
                     if (canliFiyat > 0)
                     {
                         varlik.GuncelFiyat = canliFiyat;

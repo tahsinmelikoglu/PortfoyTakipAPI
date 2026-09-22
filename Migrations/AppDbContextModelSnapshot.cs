@@ -22,32 +22,19 @@ namespace PortfoyTakipAPI.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("PortfoyTakipAPI.Models.ChatHistory", b =>
+            modelBuilder.Entity("HalkaArzKonsorsiyum", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("HalkaArzlarId")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<int>("KonsorsiyumlarId")
+                        .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.HasKey("HalkaArzlarId", "KonsorsiyumlarId");
 
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasIndex("KonsorsiyumlarId");
 
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SessionId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ChatHistories");
+                    b.ToTable("HalkaArzKonsorsiyum");
                 });
 
             modelBuilder.Entity("PortfoyTakipAPI.Models.HalkaArz", b =>
@@ -67,6 +54,9 @@ namespace PortfoyTakipAPI.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
+                    b.Property<DateTime?>("BorsaVerisiSonGuncelleme")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("DagitimYontemi")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -83,11 +73,22 @@ namespace PortfoyTakipAPI.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<string>("FiyatGecmisiJson")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("FonKullanimYerleriJson")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("GerceklesenKatilimciSayisi")
                         .HasColumnType("int");
+
+                    b.Property<decimal?>("GuncelFiyat")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("GunlukDegisimYuzdesi")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("HalkaAciklikOrani")
                         .HasPrecision(18, 2)
@@ -99,10 +100,6 @@ namespace PortfoyTakipAPI.Migrations
 
                     b.Property<bool>("KatilimEndeksineUygunMu")
                         .HasColumnType("bit");
-
-                    b.Property<string>("KonsorsiyumLideri")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<decimal>("LotFiyati")
                         .HasPrecision(18, 2)
@@ -138,47 +135,29 @@ namespace PortfoyTakipAPI.Migrations
                     b.Property<int>("ToplamDagilacakLot")
                         .HasColumnType("int");
 
+                    b.Property<string>("ZamanGecmisiJson")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.ToTable("HalkaArzlar");
+                });
 
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            BorsaKodu = "MCARD",
-                            KatilimEndeksineUygunMu = false,
-                            LotFiyati = 25.00m,
-                            SirketAdi = "Metropol Kurumsal Hizmetler",
-                            Statu = "İşlem Gören",
-                            TalepToplamaBaslangic = new DateTime(2026, 3, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TalepToplamaBitis = new DateTime(2026, 3, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            ToplamDagilacakLot = 30000000
-                        },
-                        new
-                        {
-                            Id = 2,
-                            BorsaKodu = "TKNJI",
-                            KatilimEndeksineUygunMu = false,
-                            LotFiyati = 42.50m,
-                            SirketAdi = "Teknoloji Gelecek A.Ş.",
-                            Statu = "Talep Toplayan",
-                            TalepToplamaBaslangic = new DateTime(2026, 9, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TalepToplamaBitis = new DateTime(2026, 9, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            ToplamDagilacakLot = 15000000
-                        },
-                        new
-                        {
-                            Id = 3,
-                            BorsaKodu = "ENRGY",
-                            KatilimEndeksineUygunMu = false,
-                            LotFiyati = 18.20m,
-                            SirketAdi = "Yeşil Enerji Üretim",
-                            Statu = "Yaklaşan",
-                            TalepToplamaBaslangic = new DateTime(2026, 9, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TalepToplamaBitis = new DateTime(2026, 9, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            ToplamDagilacakLot = 55000000
-                        });
+            modelBuilder.Entity("PortfoyTakipAPI.Models.Konsorsiyum", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("KurumAdi")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Konsorsiyumlar");
                 });
 
             modelBuilder.Entity("PortfoyTakipAPI.Models.KullaniciGiris", b =>
@@ -254,6 +233,21 @@ namespace PortfoyTakipAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Varliklar");
+                });
+
+            modelBuilder.Entity("HalkaArzKonsorsiyum", b =>
+                {
+                    b.HasOne("PortfoyTakipAPI.Models.HalkaArz", null)
+                        .WithMany()
+                        .HasForeignKey("HalkaArzlarId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PortfoyTakipAPI.Models.Konsorsiyum", null)
+                        .WithMany()
+                        .HasForeignKey("KonsorsiyumlarId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

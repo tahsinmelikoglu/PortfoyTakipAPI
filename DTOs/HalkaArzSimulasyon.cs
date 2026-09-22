@@ -4,9 +4,8 @@
     {
         public int AlinanLotAdedi { get; set; }
         public decimal HalkaArzFiyati { get; set; }
-        public decimal HedefKarMarjiYuzdesi { get; set; } // Örn: 100 (yani %100 tavan serisi)
+        public decimal HedefKarMarjiYuzdesi { get; set; }
     }
-
     public class SimulasyonResponseDTO
     {
         public decimal ToplamYatirilanTutar { get; set; }

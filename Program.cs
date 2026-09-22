@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
+using Microsoft.OpenApi; // <-- Orijinal kütüphanene geri döndük
 using PortfoyTakipAPI.Middlewares;
 using PortfoyTakipAPI.Models;
 using PortfoyTakipAPI.Repositories;
@@ -19,30 +19,27 @@ builder.Host.UseSerilog((context, configuration) =>
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// --- REDIS CACHE AYARI ---
+// --- REDIS CACHE AYARI (PARANTEZ DÜZELTİLDİ) ---
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = "localhost:6379"; // Docker'daki Redis'in adresi
-    options.InstanceName = "PortfoyAPI_"; // Önbellekteki verilerin başına eklenecek etiket
+    options.InstanceName = "PortfoyAPI_";
 });
 // --------------------------------------
+
 // MediatR kütüphanesini projeye dahil ediyoruz
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IVarlikRepository, VarlikRepository>();
 builder.Services.AddScoped<IVarlikService, VarlikService>();
-builder.Services.AddHttpClient<IYapayZekaService, YapayZekaService>(client =>
-{
-    // Llama 3'ün derin düşünmesi için süreyi 180 saniyeye çıkarıyoruz
-    client.Timeout = TimeSpan.FromSeconds(180);
-});
-builder.Services.AddHttpClient<ISemanticSearchService, SemanticSearchService>();
-builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddHttpClient<IBistService, BistService>();
+
+
+// --- SWAGGER AYARLARI (ORİJİNAL ÇALIŞAN KODUNA DÖNÜŞTÜRÜLDÜ) ---
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "Portföy Takip API",
+    {        Title = "Portföy Takip API",
         Version = "v1",
         Description = "Kişisel Varlık ve Bütçe Yönetimi Sistemi"
     });
@@ -64,13 +61,17 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddControllers();
+// YahooFinanceWorker için HttpClient kaydediyoruz
+builder.Services.AddHttpClient<YahooFinanceWorker>();
+// Arka plan servisini (HostedService) sisteme dahil ediyoruz
+builder.Services.AddHostedService<YahooFinanceWorker>();
 
 builder.Services.AddRateLimiter(options =>
 {
     options.AddFixedWindowLimiter("SabitSinir", opt =>
     {
         opt.Window = TimeSpan.FromSeconds(10);
-        opt.PermitLimit = 5;
+        opt.PermitLimit = 50;
         opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
         opt.QueueLimit = 0;
     });
@@ -94,7 +95,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
         };
     });
 
@@ -113,15 +114,16 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// --- YENİ EKLENEN ARAYÜZ (FRONTEND) DESTEĞİ ---
-app.UseDefaultFiles(); // Varsayılan olarak index.html arar
-app.UseStaticFiles();  // wwwroot klasöründeki HTML, CSS, JS dosyalarını dışarıya açar
+// --- ARAYÜZ (FRONTEND) DESTEĞİ ---
+app.UseDefaultFiles();
+app.UseStaticFiles();
 // ----------------------------------------------
 
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseStaticFiles();
+
 app.MapControllers().RequireRateLimiting("SabitSinir");
 app.MapHub<PortfoyTakipAPI.Hubs.PortfoyHub>("/portfoyhub");
+
 app.Run();
