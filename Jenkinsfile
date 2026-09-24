@@ -9,17 +9,25 @@ pipeline {
         }
         stage('Yayınlama (Deploy)') {
             steps {
-                echo 'Uygulama arka planda ayağa kaldırılıyor...'
-                sh '''
-                    
-                    pkill -f "PortfoyTakipAPI.dll" || true
-                    
-                   
-                    dotnet publish -c Release -o ./publish
-                    
-                    
-                    JENKINS_NODE_COOKIE=dontKillMe ASPNETCORE_ENVIRONMENT=Development nohup dotnet ./publish/PortfoyTakipAPI.dll --urls "http://0.0.0.0:5000" > api.log 2>&1 &
-                '''
+                echo 'Şifreler enjekte ediliyor ve uygulama ayağa kaldırılıyor...'
+                
+                // Jenkins kasasındaki şifreleri güvenli ortama (ENV) çekiyoruz
+                withCredentials([
+                    string(credentialsId: 'JENKINS_DB_SIFRESI', variable: 'ENV_DB_SIFRESI'),
+                    string(credentialsId: 'JENKINS_JWT_SECRET', variable: 'ENV_JWT_SECRET')
+                ]) {
+                    sh '''
+                        # 1. GitHub'dan gelen yer tutucuları, kasadaki gerçek şifrelerle değiştir
+                        sed -i "s/__DB_SIFRESI__/${ENV_DB_SIFRESI}/g" appsettings.json
+                        sed -i "s/__JWT_SECRET__/${ENV_JWT_SECRET}/g" appsettings.json
+                        
+                        # 2. Şifreler yerleştikten sonra projeyi derle ve publish klasörüne çıkart
+                        dotnet publish -c Release -o ./publish
+                        
+                        # 3. Bizim kurduğumuz Linux servisini yeni kodlarla yeniden başlat
+                        sudo systemctl restart portfoyapi.service
+                    '''
+                }
             }
         }
     }
